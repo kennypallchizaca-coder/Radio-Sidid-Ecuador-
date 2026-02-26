@@ -1,0 +1,10 @@
+# Radio Sisid Ecuador - robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://radiosisidecuador.com/sitemap.xml
+
+# Bloquear rutas internas
+Disallow: /api/
+Disallow: /admin/
