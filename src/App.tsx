@@ -15,21 +15,38 @@ import { AudioProvider, useAudio } from "@/context/AudioContext";
 import { useActiveSection } from "@/hooks/useActiveSection";
 import { Header, Player } from "@/components/layout";
 import HomePage from "@/pages/Home/HomePage";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 
 const ThreeBackground = lazy(() => import("@/components/ThreeBackground/ThreeBackground"));
+
+/** true en pantallas > 768 px (escritorio/tablet grande). Evita cargar Three.js en móvil. */
+function useIsDesktop() {
+  const [desktop, setDesktop] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth > 768 : true
+  );
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 769px)");
+    const handler = (e: MediaQueryListEvent) => setDesktop(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return desktop;
+}
 
 // ── Shell interno (debe estar dentro del AudioProvider) ─────
 function AppShell() {
   const activeSection = useActiveSection();
   const { playerState, controls } = useAudio();
+  const isDesktop = useIsDesktop();
 
   return (
     <div className="flex flex-col min-h-screen relative w-full font-sans antialiased text-base-content">
-      {/* Fondo 3D animado — capa más baja (z-0) */}
-      <Suspense fallback={null}>
-        <ThreeBackground />
-      </Suspense>
+      {/* Fondo 3D animado — solo escritorio (evita crash en móvil) */}
+      {isDesktop && (
+        <Suspense fallback={null}>
+          <ThreeBackground />
+        </Suspense>
+      )}
 
       {/* Todo el contenido visible sobre el fondo 3D */}
       <div className="relative z-10 flex flex-col min-h-screen">
