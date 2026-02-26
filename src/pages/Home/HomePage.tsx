@@ -16,6 +16,9 @@ export default function HomePage() {
       {/* Sección 1 — Galería (Carrusel de fotos) primero tras Navbar (Nav/Header es estático general) */}
       <Gallery />
 
+      {/* Ancla para "Escúchanos en Vivo" */}
+      <div id="escuchanos" />
+
       {/* Sección 2 — Hero con botón de play gigante */}
       <Hero playerState={playerState} controls={controls} />
 

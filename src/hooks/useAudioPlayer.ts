@@ -90,6 +90,23 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
 
   const audioRef = useRef(audio);
 
+  /** Intentar play() ignorando errores transitorios del browser */
+  const safePlay = useCallback((a: HTMLAudioElement) => {
+    const p = a.play();
+    if (p !== undefined) {
+      p.catch((err: DOMException) => {
+        // AbortError = el browser canceló play (ej. src cambió rápido) → ignorar
+        if (err.name === "AbortError") return;
+        // NotAllowedError = falta interacción del usuario → reintentar al próximo click
+        if (err.name === "NotAllowedError") {
+          setStatus("idle");
+          return;
+        }
+        setStatus("error");
+      });
+    }
+  }, []);
+
   // ─── Estado ─────────────────────────────────────────────────
   const [status, setStatus] = useState<PlayerStatus>("idle");
   const [volume, setVolumeState] = useState<number>(0.75);
@@ -152,16 +169,16 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
     if (mode === "live") {
       // Cambiar al stream real
       a.src = APP_CONFIG.STREAM_URL;
-      a.play().catch(() => {/* waiting/error events handle status */});
+      safePlay(a);
     } else {
       // Cambiar a música local
       const track = MUSIC_TRACKS[trackIndexRef.current];
       if (track) {
         a.src = `/musica/${encodeURIComponent(track.file)}`;
-        a.play().catch(() => {/* waiting/error events handle status */});
+        safePlay(a);
       }
     }
-  }, [mode]);
+  }, [mode, safePlay]);
 
   // ─── Sincronizar volumen ────────────────────────────────────
   useEffect(() => {
@@ -173,8 +190,15 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
     const a = audioRef.current;
 
     const handleWaiting = () => setStatus("loading");
-    const handlePlaying = () => setStatus("playing");
-    const handlePause   = () => setStatus("paused");
+    const handlePlaying = () => {
+      // Solo marcar "playing" si no está silenciado (simulando pausa)
+      if (!a.muted) setStatus("playing");
+    };
+    const handlePause   = () => {
+      // Solo marcar "paused" si realmente se pausó (no cuando solo muteamos)
+      if (a.muted && !a.paused) return; // está muteado pero corriendo → no cambiar
+      setStatus("paused");
+    };
     const handleError   = () => {
       // En modo música, intentar siguiente track en vez de error
       if (modeRef.current === "music" && MUSIC_TRACKS.length > 1) {
@@ -196,9 +220,9 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
       }
     };
 
-    /** Guardar posición cada 2 segundos mientras reproduce */
+    /** Guardar posición mientras reproduce (no cuando está muteado/pausado) */
     const handleTimeUpdate = () => {
-      if (modeRef.current === "music" && a.currentTime > 0) {
+      if (modeRef.current === "music" && a.currentTime > 0 && !a.muted) {
         savePlaybackState(trackIndexRef.current, a.currentTime, modeRef.current);
       }
     };
@@ -226,14 +250,18 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
   useEffect(() => {
     if (modeRef.current !== "music") return;
     const a = audioRef.current;
-    const wasPlaying = statusRef.current === "playing" || statusRef.current === "loading";
+    // También avanzar si el audio está muteado (simulando pausa) — sigue corriendo
+    const isActive = statusRef.current === "playing" || statusRef.current === "loading"
+      || (statusRef.current === "paused" && !a.paused);
     const track = MUSIC_TRACKS[trackIndex];
-    if (!track || !wasPlaying) return;
+    if (!track || !isActive) return;
 
+    const wasMuted = a.muted;
     a.src = `/musica/${encodeURIComponent(track.file)}`;
+    a.muted = wasMuted; // preservar estado mute
     a.load();
-    a.play().catch(() => {/* browser policy */});
-  }, [trackIndex]);
+    safePlay(a);
+  }, [trackIndex, safePlay]);
 
   // ─── Restaurar reproducción tras recarga ────────────────────
   useEffect(() => {
@@ -244,7 +272,7 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
       // En vivo: reconectar al stream (no hay posición que restaurar)
       a.src = APP_CONFIG.STREAM_URL;
       setStatus("loading");
-      a.play().catch(() => setStatus("error"));
+      safePlay(a);
     } else {
       // Música: restaurar track y posición exacta
       const track = MUSIC_TRACKS[savedState.trackIndex];
@@ -255,7 +283,7 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
         const handleCanPlay = () => {
           a.currentTime = savedState.currentTime;
           setStatus("loading");
-          a.play().catch(() => setStatus("error"));
+          safePlay(a);
           a.removeEventListener("canplay", handleCanPlay);
         };
         a.addEventListener("canplay", handleCanPlay);
@@ -265,41 +293,58 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
   }, []);
 
   // ─── Toggle play/pause ─────────────────────────────────────
+  // En modo música simula "en vivo": pausar = silenciar (el audio
+  // sigue corriendo en background para que no se quede estancado).
+  // En modo live real: desconecta del stream al pausar.
   const toggle = useCallback(() => {
     const a = audioRef.current;
 
     if (status === "playing" || status === "loading") {
-      a.pause();
       if (modeRef.current === "live") {
-        a.src = ""; // liberar conexión al stream
+        // Stream real: desconectar
+        a.pause();
+        a.src = "";
+        clearPlaybackState();
+        setStatus("paused");
+      } else {
+        // Música local simulando "en vivo": solo silenciar
+        a.muted = true;
+        clearPlaybackState();
+        setStatus("paused");
+        // El audio sigue reproduciéndose en segundo plano (muted)
       }
-      clearPlaybackState();
-      setStatus("paused");
     } else {
       if (modeRef.current === "live") {
         // Conectar al stream real
         a.src = APP_CONFIG.STREAM_URL;
+        setStatus("loading");
+        safePlay(a);
       } else {
-        // Reproducir música local
-        const track = MUSIC_TRACKS[trackIndexRef.current];
-        if (track) {
-          // Solo asignar src si está vacío o es diferente
-          const expectedSrc = `/musica/${encodeURIComponent(track.file)}`;
-          if (!a.src || !a.src.includes(encodeURIComponent(track.file))) {
-            a.src = expectedSrc;
-          }
+        // Música local: si ya estaba corriendo (muted), solo desmuteamos
+        if (a.src && !a.paused && !a.ended) {
+          a.muted = false;
+          a.volume = isMuted ? 0 : volume;
+          setStatus("playing");
         } else {
-          setStatus("error");
-          return;
+          // Primera reproducción o acabó el track
+          const track = MUSIC_TRACKS[trackIndexRef.current];
+          if (track) {
+            const expectedSrc = `/musica/${encodeURIComponent(track.file)}`;
+            if (!a.src || !a.src.includes(encodeURIComponent(track.file))) {
+              a.src = expectedSrc;
+            }
+          } else {
+            setStatus("error");
+            return;
+          }
+          a.muted = false;
+          a.volume = isMuted ? 0 : volume;
+          setStatus("loading");
+          safePlay(a);
         }
       }
-      setStatus("loading");
-      const playPromise = a.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => setStatus("error"));
-      }
     }
-  }, [status, audioRef]);
+  }, [status, volume, isMuted, audioRef, safePlay]);
 
   /** Ajusta el volumen (0.0 – 1.0) */
   const setVolume = useCallback((vol: number) => {

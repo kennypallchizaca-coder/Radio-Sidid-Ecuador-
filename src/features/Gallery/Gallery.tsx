@@ -60,7 +60,7 @@ export default function Gallery() {
     const [activeIndex, setActiveIndex] = useState(0);
     const isPausedRef   = useRef(false);
     const intervalRef   = useRef<ReturnType<typeof setInterval> | null>(null);
-    const autoplayDelay = 4000;
+    const autoplayDelay = 2500;
 
     const startAutoplay = useCallback(() => {
         if (intervalRef.current) clearInterval(intervalRef.current);
@@ -92,16 +92,26 @@ export default function Gallery() {
     };
 
     return (
-        <section id="galeria" aria-labelledby="gallery-title" className="py-20 sm:py-28 overflow-hidden relative">
-            <div className="max-w-7xl mx-auto px-5 sm:px-8 mb-6 sm:mb-12 text-center">
-                <span className="section-eyebrow justify-center">Galería</span>
-                <h2 id="gallery-title" className="mt-3 font-black tracking-tighter text-base-content" style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)" }}>
-                    Nuestra <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Historia</span>
-                </h2>
-                <p className="mt-4 text-base-content/60 max-w-xl mx-auto text-sm sm:text-base">
-                    Desliza para explorar los momentos y equipos que hacen posible la transmisión diaria de nuestra cultura y música.
-                </p>
-            </div>
+        <section
+  id="galeria"
+  aria-labelledby="gallery-title"
+  className="py-20 sm:py-28 overflow-hidden relative"
+>
+  <div className="max-w-7xl mx-auto px-5 sm:px-8 mb-6 sm:mb-12 text-center">
+    <h2
+      id="gallery-title"
+      className="mt-3 font-black tracking-tighter text-base-content"
+      style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)" }}
+    >
+      Bienvenidos{" "}
+      <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-blue-500 to-red-500">
+        a Radio Sisid Ecuador
+      </span>
+    </h2>
+      <p className="mt-4 max-w-xl mx-auto text-base sm:text-lg font-medium leading-relaxed tracking-wide text-base-content/70 font-sans">
+    La mejor música ecuatoriana y del mundo, ¡todo en un solo lugar para que la disfrutes a lo grande!
+    </p>
+  </div>
 
             <div className="w-full flex-col items-center justify-center font-sans overflow-hidden">
                 <div

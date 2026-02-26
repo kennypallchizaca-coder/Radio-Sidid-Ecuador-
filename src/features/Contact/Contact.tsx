@@ -2,7 +2,7 @@ import { SOCIAL_CONFIG, getWhatsAppUrl } from "@/config";
 import { motion } from "framer-motion";
 
 /* ── Íconos SVG compactos ──────────────────────────────────── */
-const Icon = ({ children, size = 20 }: { children: React.ReactNode; size?: number }) => (
+const Icon = ({ children, size = 22 }: { children: React.ReactNode; size?: number }) => (
   <svg width={size} height={size} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">{children}</svg>
 );
 
@@ -11,9 +11,9 @@ const IconFacebook = () => <Icon><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 
 const IconYouTube = () => <Icon><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" /></Icon>;
 const IconInstagram = () => <Icon><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" /></Icon>;
 
-const ArrowIcon = () => (
-  <svg className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-);
+/* ── Retro helpers ─────────────────────────────────────────── */
+const retroShadow = "shadow-[5px_5px_0_#000]";
+const retroShadowHover = "hover:shadow-[7px_7px_0_#000]";
 
 /* ── Datos de cards ────────────────────────────────────────── */
 const CARDS = [
@@ -21,33 +21,40 @@ const CARDS = [
     name: "Facebook",
     href: SOCIAL_CONFIG.FACEBOOK_URL,
     color: "#1877F2",
+    bg: "bg-[#1877F2]",
+    labelBg: "bg-blue-400",
     icon: <IconFacebook />,
-    cta: "Visitar página",
+    cta: "VISITAR PÁGINA",
     desc: "Transmisiones en vivo y eventos",
   },
   {
     name: "Instagram",
     href: SOCIAL_CONFIG.INSTAGRAM_URL,
     color: "#E1306C",
-    gradient: "from-[#f9ce34] via-[#ee2a7b] to-[#6228d7]",
+    bg: "bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7]",
+    labelBg: "bg-pink-400",
     icon: <IconInstagram />,
-    cta: "Ver perfil",
+    cta: "VER PERFIL",
     desc: "Fotos, historias y momentos",
   },
   {
     name: "YouTube",
     href: SOCIAL_CONFIG.YOUTUBE_URL,
     color: "#FF0000",
+    bg: "bg-[#FF0000]",
+    labelBg: "bg-red-400",
     icon: <IconYouTube />,
-    cta: "Ver canal",
+    cta: "VER CANAL",
     desc: "Videos y transmisiones en vivo",
   },
   {
     name: "WhatsApp",
     href: getWhatsAppUrl(),
     color: "#25D366",
+    bg: "bg-[#25D366]",
+    labelBg: "bg-emerald-400",
     icon: <IconWhatsApp />,
-    cta: "Enviar mensaje",
+    cta: "ENVIAR MENSAJE",
     desc: SOCIAL_CONFIG.WHATSAPP_DISPLAY,
   },
 ];
@@ -57,17 +64,11 @@ export default function Contact() {
     <section
       id="contacto"
       aria-labelledby="contact-title"
-      className="py-20 sm:py-28 relative overflow-hidden"
+      className="py-20 sm:py-28 relative overflow-hidden font-mono"
     >
-      {/* Decorative blobs */}
-      <div className="absolute inset-0 pointer-events-none select-none" aria-hidden="true">
-        <div className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-red-600/5 rounded-full blur-[120px]" />
-        <div className="absolute -bottom-32 right-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px]" />
-      </div>
-
       <div className="max-w-5xl mx-auto px-5 sm:px-8 relative z-10">
 
-        {/* Header */}
+        {/* ── Header retro ─────────────────────────────────── */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -75,24 +76,19 @@ export default function Contact() {
           transition={{ duration: 0.5 }}
           className="text-center mb-12 sm:mb-16"
         >
-          <span className="section-eyebrow mb-4">Contacto</span>
           <h2
             id="contact-title"
-            className="font-black tracking-tighter text-base-content leading-[1.08]"
-            style={{ fontSize: "clamp(2rem, 5vw, 3.2rem)" }}
+            className={`inline-block text-2xl sm:text-4xl font-black text-gray-900 bg-amber-400 px-6 py-3 border-4 border-gray-900 rounded-lg ${retroShadow} uppercase tracking-wider`}
           >
-            Conéctate con{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-red-400 to-orange-400">
-              nosotros
-            </span>
+            Conéctate
           </h2>
-          <p className="mt-4 text-base-content/45 max-w-md mx-auto text-sm sm:text-base leading-relaxed">
-            Síguenos, escríbenos o llámanos.
+          <p className={`mt-5 inline-block text-sm sm:text-base font-bold text-white bg-pink-500 px-4 py-2 border-2 border-gray-900 rounded-sm ${retroShadow}`}>
+            Síguenos, escríbenos o llámanos
           </p>
         </motion.div>
 
-        {/* ── 4 cards grid (2×2) ──────────────────────────── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* ── 4 cards retro grid (2×2) ────────────────────── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {CARDS.map((card, i) => (
             <motion.a
               key={card.name}
@@ -102,39 +98,44 @@ export default function Contact() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.4, delay: i * 0.08 }}
-              whileHover={{ y: -4, scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="group relative overflow-hidden rounded-2xl border p-5 transition-all duration-400 focus-visible:outline-none focus-visible:ring-2"
-              style={{
-                borderColor: `${card.color}15`,
-                background: `linear-gradient(135deg, ${card.color}12 0%, transparent 60%)`,
-              }}
+              transition={{ duration: 0.35, delay: i * 0.1 }}
+              className={`group relative border-4 border-gray-900 rounded-xl bg-gray-100 ${retroShadow} ${retroShadowHover} transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] active:shadow-[2px_2px_0_#000] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2`}
             >
-              {/* Subtle glow */}
-              <div
-                className="absolute -top-12 -right-12 w-32 h-32 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                style={{ background: card.color }}
-                aria-hidden="true"
-              />
+              {/* Icon container + Tag label */}
+              <div className="flex items-center gap-4 p-5">
+                <div
+                  className={`w-14 h-14 rounded-lg border-4 border-gray-900 ${card.bg} flex items-center justify-center text-white shrink-0 ${retroShadow} group-hover:scale-110 transition-transform duration-300`}
+                >
+                  {card.icon}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                    <span className={`${card.labelBg} text-gray-900 font-black text-[11px] uppercase tracking-wider px-2.5 py-0.5 border-2 border-gray-900 rounded-sm`}>
+                      {card.name}
+                    </span>
+                  </div>
+                  <p className="text-gray-600 text-xs font-semibold truncate">{card.desc}</p>
+                </div>
+              </div>
 
-              <div className="relative z-10">
-                <div className="flex items-center gap-3 mb-3">
-                  <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform duration-300 ${card.gradient ? `bg-gradient-to-tr ${card.gradient}` : ""}`}
-                    style={card.gradient ? undefined : { background: card.color }}
-                  >
-                    {card.icon}
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-white leading-none">{card.name}</h4>
-                    <p className="text-[11px] text-white/30 mt-0.5">{card.desc}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5 font-semibold text-xs group-hover:gap-2.5 transition-all duration-300" style={{ color: card.color }}>
-                  <span>{card.cta}</span>
-                  <ArrowIcon />
-                </div>
+              {/* CTA bar */}
+              <div
+                className="border-t-4 border-gray-900 px-5 py-3 flex items-center justify-between rounded-b-[8px] transition-colors duration-300"
+                style={{ background: `${card.color}18` }}
+              >
+                <span className="text-xs font-black uppercase tracking-widest text-gray-900">
+                  {card.cta}
+                </span>
+                <svg
+                  className="w-5 h-5 text-gray-900 group-hover:translate-x-1.5 transition-transform duration-300"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
               </div>
             </motion.a>
           ))}

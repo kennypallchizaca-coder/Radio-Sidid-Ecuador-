@@ -57,13 +57,13 @@ export default function AppPromo() {
                             style={{ fontSize: "clamp(2.4rem, 6vw, 4rem)" }}
                         >
                             Lleva la radio <br />
-                            <span className="bg-gradient-to-r from-red-500 via-red-400 to-orange-400 bg-clip-text text-transparent">
+                            <span className="bg-gradient-to-r from-yellow-500 via-blue-400 to-red-400 bg-clip-text text-transparent">
                                 en tu bolsillo
                             </span>
                         </h2>
 
                         <p className="text-base-content/60 text-lg leading-relaxed max-w-md mb-10">
-                            Descarga la app oficial de {APP_CONFIG.RADIO_NAME} con transmisión en vivo, podcasts exclusivos y notificaciones de tus programas favoritos.
+                            Descarga la app oficial de {APP_CONFIG.RADIO_NAME} con transmisión en vivo y notificaciones de tus programas favoritos.
                         </p>
 
                         {/* Caracteristicas previas */}

@@ -3,7 +3,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://radiosisidecuador.com/sitemap.xml
+Sitemap: https://radio-sidid-ecuador.vercel.app/sitemap.xml
 
 # Bloquear rutas internas
 Disallow: /api/
