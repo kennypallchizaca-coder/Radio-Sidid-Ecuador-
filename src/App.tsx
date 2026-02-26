@@ -42,10 +42,12 @@ function AppShell() {
   return (
     <div className="flex flex-col min-h-screen relative w-full font-sans antialiased text-base-content">
       {/* Fondo 3D animado — solo escritorio (evita crash en móvil) */}
-      {isDesktop && (
+      {isDesktop ? (
         <Suspense fallback={null}>
           <ThreeBackground />
         </Suspense>
+      ) : (
+        <div className="mobile-bg" aria-hidden="true" />
       )}
 
       {/* Todo el contenido visible sobre el fondo 3D */}

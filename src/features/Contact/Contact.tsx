@@ -88,7 +88,7 @@ export default function Contact() {
         </motion.div>
 
         {/* ── 4 cards retro grid (2×2) ────────────────────── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="grid grid-cols-2 gap-3 sm:gap-6">
           {CARDS.map((card, i) => (
             <motion.a
               key={card.name}
@@ -99,35 +99,35 @@ export default function Contact() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
               transition={{ duration: 0.35, delay: i * 0.1 }}
-              className={`group relative border-4 border-gray-900 rounded-xl bg-gray-100 ${retroShadow} ${retroShadowHover} transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] active:shadow-[2px_2px_0_#000] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2`}
+              className={`group relative border-3 sm:border-4 border-gray-900 rounded-xl bg-gray-100 shadow-[3px_3px_0_#000] sm:${retroShadow} hover:shadow-[5px_5px_0_#000] sm:${retroShadowHover} transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] active:shadow-[2px_2px_0_#000] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2`}
             >
               {/* Icon container + Tag label */}
-              <div className="flex items-center gap-4 p-5">
+              <div className="flex items-center gap-2.5 sm:gap-4 p-3 sm:p-5">
                 <div
-                  className={`w-14 h-14 rounded-lg border-4 border-gray-900 ${card.bg} flex items-center justify-center text-white shrink-0 ${retroShadow} group-hover:scale-110 transition-transform duration-300`}
+                  className={`w-10 h-10 sm:w-14 sm:h-14 rounded-lg border-3 sm:border-4 border-gray-900 ${card.bg} flex items-center justify-center text-white shrink-0 shadow-[2px_2px_0_#000] sm:${retroShadow} group-hover:scale-110 transition-transform duration-300`}
                 >
                   {card.icon}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                    <span className={`${card.labelBg} text-gray-900 font-black text-[11px] uppercase tracking-wider px-2.5 py-0.5 border-2 border-gray-900 rounded-sm`}>
+                  <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-1.5 flex-wrap">
+                    <span className={`${card.labelBg} text-gray-900 font-black text-[9px] sm:text-[11px] uppercase tracking-wider px-1.5 sm:px-2.5 py-0.5 border sm:border-2 border-gray-900 rounded-sm`}>
                       {card.name}
                     </span>
                   </div>
-                  <p className="text-gray-600 text-xs font-semibold truncate">{card.desc}</p>
+                  <p className="text-gray-600 text-[10px] sm:text-xs font-semibold truncate">{card.desc}</p>
                 </div>
               </div>
 
               {/* CTA bar */}
               <div
-                className="border-t-4 border-gray-900 px-5 py-3 flex items-center justify-between rounded-b-[8px] transition-colors duration-300"
+                className="border-t-3 sm:border-t-4 border-gray-900 px-3 sm:px-5 py-2 sm:py-3 flex items-center justify-between rounded-b-[8px] transition-colors duration-300"
                 style={{ background: `${card.color}18` }}
               >
-                <span className="text-xs font-black uppercase tracking-widest text-gray-900">
+                <span className="text-[9px] sm:text-xs font-black uppercase tracking-widest text-gray-900">
                   {card.cta}
                 </span>
                 <svg
-                  className="w-5 h-5 text-gray-900 group-hover:translate-x-1.5 transition-transform duration-300"
+                  className="w-4 h-4 sm:w-5 sm:h-5 text-gray-900 group-hover:translate-x-1.5 transition-transform duration-300"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth={3}

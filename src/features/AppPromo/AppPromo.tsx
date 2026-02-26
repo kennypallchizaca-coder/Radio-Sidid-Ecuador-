@@ -62,12 +62,12 @@ export default function AppPromo() {
                             </span>
                         </h2>
 
-                        <p className="text-base-content/60 text-lg leading-relaxed max-w-md mb-10">
+                        <p className="text-base-content/60 text-base sm:text-lg leading-relaxed max-w-md mb-8 sm:mb-10">
                             Descarga la app oficial de {APP_CONFIG.RADIO_NAME} con transmisión en vivo y notificaciones de tus programas favoritos.
                         </p>
 
                         {/* Caracteristicas previas */}
-                        <ul className="flex flex-col sm:flex-row gap-4 mb-10 list-none" role="list">
+                        <ul className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8 sm:mb-10 list-none" role="list">
                             {[
                                 { icon: <IconSignal />, text: "Transmision en vivo" },
                                 { icon: <IconMic />, text: "Podcasts exclusivos" },

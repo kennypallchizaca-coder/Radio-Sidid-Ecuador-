@@ -34,7 +34,7 @@ function Card({ card, index, activeIndex, totalCards }: CardProps) {
 
     return (
         <motion.div
-            className="absolute w-[80%] md:w-1/3 h-[90%] sm:h-[95%]"
+            className="absolute w-[85%] sm:w-[80%] md:w-1/3 h-[90%] sm:h-[95%]"
             style={{ transformStyle: "preserve-3d" }}
             animate={animate}
             initial={false}
@@ -121,7 +121,7 @@ export default function Gallery() {
                     onTouchStart={() => { isPausedRef.current = true; }}
                     onTouchEnd={() => { setTimeout(() => { isPausedRef.current = false; }, 1500); }}
                 >
-                    <div className="relative w-full h-[350px] sm:h-[450px] md:h-[500px] flex items-center justify-center overflow-hidden">
+                    <div className="relative w-full h-[300px] sm:h-[450px] md:h-[500px] flex items-center justify-center overflow-hidden">
                         <motion.div
                             className="w-full h-full flex items-center justify-center"
                             drag="x"
