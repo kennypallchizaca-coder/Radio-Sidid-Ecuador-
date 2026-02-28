@@ -32,7 +32,7 @@ export const APP_CONFIG = {
   // ── SEO / Meta ───────────────────────────────────────────────
   META_DESCRIPTION: "Radio Sisid Ecuador — La voz del pueblo cañari. Desde Minneapolis, Minnesota hacia el mundo.",
   META_KEYWORDS: "radio, ecuador, cañari, en vivo, streaming, minneapolis, minnesota, radio online",
-  OG_IMAGE_URL: "/og-image.jpg",
+  OG_IMAGE_URL: "/img/seo-banner.png",
 } as const;
 
 export type AppConfig = typeof APP_CONFIG;

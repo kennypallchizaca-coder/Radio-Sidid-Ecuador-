@@ -239,11 +239,46 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
     const handleSeeking = () => {
       if (modeRef.current === "music") {
         const freshState = getSimulatedPlaybackState();
-        // Evitar que el usuario adelante manualmente la música (mantenemos el "Live" feel)
         if (Math.abs(a.currentTime - freshState.progressTimeSeconds) > 2) {
           a.currentTime = freshState.progressTimeSeconds;
         }
       }
+    };
+
+    // ── Optimización de Latencia (Sincronización en Vivo) ──
+    const handleProgress = () => {
+      if (modeRef.current === "live" && a.buffered.length > 0) {
+        const lastBuffered = a.buffered.end(a.buffered.length - 1);
+        const delay = lastBuffered - a.currentTime;
+
+        // Si el delay respecto al "borde en vivo" es mayor a 3 segundos, saltamos al final
+        if (delay > 3) {
+          // console.log("Catching up to live edge...", delay);
+          a.currentTime = lastBuffered - 0.5; // Dejamos medio segundo de margen
+        }
+      }
+    };
+
+    // Recuperación de "stalled" (cuando el buffer se vacía en móvil/WhatsApp)
+    let stallTimeout: any = null;
+    const handleStalled = () => {
+      // Si el stream se detiene por red móvil, esperamos 2 seg y reiniciamos
+      if (statusRef.current === "playing") {
+        // console.warn("Stream stalled, waiting for recovery...");
+        if (stallTimeout) clearTimeout(stallTimeout);
+        stallTimeout = setTimeout(() => {
+          if (a.paused === false && modeRef.current === "live") {
+            // console.log("Force reconnecting live stream due to stall");
+            a.src = APP_CONFIG.STREAM_URL;
+            a.load();
+            safePlay(a);
+          }
+        }, 2500);
+      }
+    };
+
+    const handleSuspend = () => {
+      if (stallTimeout) clearTimeout(stallTimeout);
     };
 
     a.addEventListener("waiting", handleWaiting);
@@ -252,14 +287,21 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
     a.addEventListener("error", handleError);
     a.addEventListener("ended", handleEnded);
     a.addEventListener("seeking", handleSeeking);
+    a.addEventListener("progress", handleProgress);
+    a.addEventListener("stalled", handleStalled);
+    a.addEventListener("suspend", handleSuspend);
 
     return () => {
+      if (stallTimeout) clearTimeout(stallTimeout);
       a.removeEventListener("waiting", handleWaiting);
       a.removeEventListener("playing", handlePlaying);
       a.removeEventListener("pause", handlePause);
       a.removeEventListener("error", handleError);
       a.removeEventListener("ended", handleEnded);
       a.removeEventListener("seeking", handleSeeking);
+      a.removeEventListener("progress", handleProgress);
+      a.removeEventListener("stalled", handleStalled);
+      a.removeEventListener("suspend", handleSuspend);
     };
   }, [audioRef, safePlay]);
 
