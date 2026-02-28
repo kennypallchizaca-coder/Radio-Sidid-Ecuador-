@@ -1,5 +1,6 @@
 import { useRef, useEffect, useCallback } from "react";
 import type { AudioPlayerState, AudioPlayerControls } from "@/hooks";
+import { APP_CONFIG } from "@/config";
 import { PlayIcon, PauseIcon, SpeakerLoudIcon, SpeakerQuietIcon } from "@radix-ui/react-icons";
 
 interface PlayerProps {
@@ -11,12 +12,12 @@ interface PlayerProps {
  * SoundWave — Animated canvas waveform
  * ───────────────────────────────────────────────────────────────── */
 
-const BAR_COUNT     = 32;
-const BAR_GAP       = 2;
-const BAR_MIN       = 2;
-const BAR_RADIUS    = 2;
-const LERP_UP       = 0.12;   // velocidad de subida
-const LERP_DOWN     = 0.06;   // velocidad de bajada (más lento = más suave)
+const BAR_COUNT = 32;
+const BAR_GAP = 2;
+const BAR_MIN = 2;
+const BAR_RADIUS = 2;
+const LERP_UP = 0.12;   // velocidad de subida
+const LERP_DOWN = 0.06;   // velocidad de bajada (más lento = más suave)
 
 /** Genera un array de alturas "objetivo" aleatorias simulando frecuencias */
 function randomTargets(count: number, maxH: number): Float32Array {
@@ -24,7 +25,7 @@ function randomTargets(count: number, maxH: number): Float32Array {
   for (let i = 0; i < count; i++) {
     // las barras del centro tienden a ser más altas (efecto de campana)
     const center = Math.abs(i - count / 2) / (count / 2);
-    const base   = 1 - center * 0.55;
+    const base = 1 - center * 0.55;
     t[i] = (Math.random() * 0.6 + 0.4) * base * maxH;
   }
   return t;
@@ -37,13 +38,13 @@ interface SoundWaveProps {
 }
 
 function SoundWave({ isPlaying, width = 160, height = 36 }: SoundWaveProps) {
-  const canvasRef    = useRef<HTMLCanvasElement>(null);
-  const rafRef       = useRef<number>(0);
-  const currentH     = useRef<Float32Array>(new Float32Array(BAR_COUNT));
-  const targetH      = useRef<Float32Array>(new Float32Array(BAR_COUNT));
-  const tickRef      = useRef(0);
-  const playingRef   = useRef(isPlaying);
-  const drawRef      = useRef<(() => void) | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const rafRef = useRef<number>(0);
+  const currentH = useRef<Float32Array>(new Float32Array(BAR_COUNT));
+  const targetH = useRef<Float32Array>(new Float32Array(BAR_COUNT));
+  const tickRef = useRef(0);
+  const playingRef = useRef(isPlaying);
+  const drawRef = useRef<(() => void) | null>(null);
 
   // mantener ref sincronizada sin re-renderizar
   useEffect(() => { playingRef.current = isPlaying; }, [isPlaying]);
@@ -55,12 +56,12 @@ function SoundWave({ isPlaying, width = 160, height = 36 }: SoundWaveProps) {
     if (!ctx) return;
 
     const dpr = window.devicePixelRatio || 1;
-    const w   = canvas.clientWidth;
-    const h   = canvas.clientHeight;
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
 
     // ajustar resolución real una sola vez si cambió
     if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
-      canvas.width  = w * dpr;
+      canvas.width = w * dpr;
       canvas.height = h * dpr;
       ctx.scale(dpr, dpr);
     }
@@ -82,23 +83,23 @@ function SoundWave({ isPlaying, width = 160, height = 36 }: SoundWaveProps) {
       }
     }
 
-    // gradiente vertical
+    // gradiente vertical: colores ecuador
     const grad = ctx.createLinearGradient(0, h, 0, 0);
-    grad.addColorStop(0, "rgba(239, 68, 68, 0.9)");   // red-500
-    grad.addColorStop(0.5, "rgba(249, 115, 22, 0.8)"); // orange-500
-    grad.addColorStop(1, "rgba(251, 191, 36, 0.7)");   // amber-400
+    grad.addColorStop(0, "rgba(237, 28, 36, 0.9)");   // rojo (ed1c24)
+    grad.addColorStop(0.5, "rgba(0, 51, 160, 0.8)");  // azul (0033a0)
+    grad.addColorStop(1, "rgba(255, 204, 0, 0.9)");   // amarillo (ffcc00)
 
     ctx.fillStyle = grad;
 
     for (let i = 0; i < BAR_COUNT; i++) {
       const target = targetH.current[i];
-      const cur    = currentH.current[i];
-      const lerp   = target > cur ? LERP_UP : LERP_DOWN;
+      const cur = currentH.current[i];
+      const lerp = target > cur ? LERP_UP : LERP_DOWN;
       currentH.current[i] = cur + (target - cur) * lerp;
 
       const barH = Math.max(BAR_MIN, currentH.current[i]);
-      const x    = i * (barW + BAR_GAP);
-      const y    = h - barH;
+      const x = i * (barW + BAR_GAP);
+      const y = h - barH;
 
       // barra con esquinas redondeadas
       ctx.beginPath();
@@ -166,7 +167,7 @@ function SoundWaveMini({ isPlaying }: { isPlaying: boolean }) {
           style={{
             height: isPlaying ? `${bar.h}px` : "3px",
             background: isPlaying
-              ? "linear-gradient(to top, #ef4444, #f97316, #fbbf24)"
+              ? "linear-gradient(to top, #ed1c24, #0033a0, #ffcc00)"
               : "rgba(255,255,255,0.15)",
             animation: isPlaying
               ? `wave-bar 0.6s ease-in-out ${bar.delay} infinite alternate`
@@ -236,42 +237,53 @@ export default function Player({ playerState, controls }: PlayerProps) {
             <div
               className="absolute -inset-1.5 rounded-full pointer-events-none"
               style={{
-                background: "conic-gradient(from 0deg, transparent 0%, #ef4444 25%, transparent 50%, #f97316 75%, transparent 100%)",
+                background: "conic-gradient(from 0deg, transparent 0%, #ffcc00 25%, transparent 50%, #0033a0 75%, transparent 85%, #ed1c24 100%)",
                 animation: "spin 3s linear infinite",
-                opacity: 0.5,
+                opacity: 0.7,
               }}
             />
           )}
-          {/* Ondas de radio expandiéndose */}
+          {/* Ondas de radio expandiéndose en Amarillo, Azul y Rojo (Visibles bajo z-20) */}
           {isPlaying && (
-            <>
-              <span className="absolute -inset-3 rounded-full border border-red-500/20 animate-[pulse-ring_2s_ease-out_infinite] pointer-events-none" />
-              <span className="absolute -inset-5 rounded-full border border-red-500/10 animate-[pulse-ring_2s_ease-out_0.7s_infinite] pointer-events-none" />
-            </>
-          )}
+            <div className="absolute inset-0 z-0 pointer-events-none">
+              <span className="absolute -inset-2 rounded-full border border-[#ffcc00]/50 animate-[pulse-ring_2s_ease-out_infinite] shadow-[0_0_10px_rgba(255,204,0,0.5)]" />
+              <span className="absolute -inset-4 rounded-full border border-[#0033a0]/50 animate-[pulse-ring_2.5s_ease-out_0.4s_infinite] shadow-[0_0_10px_rgba(0,51,160,0.5)]" />
+              <span className="absolute -inset-6 rounded-full border border-[#ed1c24]/50 animate-[pulse-ring_3s_ease-out_0.8s_infinite] shadow-[0_0_10px_rgba(237,28,36,0.5)]" />
+            </div>
+          )}          {/* Etiqueta central del disco (Logo Siempre Visible e Interactivo) */}
+          <div className={`absolute inset-[15%] rounded-full bg-gradient-to-tr from-yellow-300 via-blue-400 to-red-400 p-[2px] z-30 shadow-[0_4px_10px_rgba(0,0,0,0.5)] pointer-events-none transition-transform duration-500 ${isPlaying ? 'animate-[spin_4s_linear_infinite] scale-100' : 'scale-90 opacity-90'}`}>
+            <div className="w-full h-full rounded-full bg-[#111] overflow-hidden flex items-center justify-center relative shadow-[inset_0_0_15px_rgba(0,0,0,0.8)]">
+              <img
+                src={APP_CONFIG.LOGO_URL || "/logoradio.jpg"}
+                alt="Logo Radio center"
+                className="w-full h-full object-cover scale-110 opacity-100"
+              />
+              <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-20 pointer-events-none" />
+            </div>
+          </div>
           <button
             aria-label={isPlaying ? "Pausar radio" : "Reproducir radio"}
             onClick={controls.toggle}
             disabled={isLoading}
             className={[
-              "relative flex items-center justify-center",
-              "w-11 h-11 sm:w-12 sm:h-12 rounded-full",
+              "relative flex items-center justify-center z-40 overflow-hidden",
+              "w-12 h-12 sm:w-14 sm:h-14 rounded-full",
               "font-bold text-white",
               "transition-all duration-300 active:scale-90",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-red-500",
               isLoading
-                ? "bg-base-300 cursor-not-allowed"
+                ? "bg-black/50 cursor-not-allowed border border-white/20"
                 : isPlaying
-                ? "bg-gradient-to-br from-red-500 to-red-700 shadow-lg shadow-red-700/50 hover:from-red-400 hover:to-red-600 hover:shadow-red-600/60"
-                : "bg-gradient-to-br from-neutral-700 to-neutral-900 shadow-md hover:from-neutral-600 hover:to-neutral-800",
+                  ? "bg-transparent hover:bg-black/20"
+                  : "bg-black/20 hover:bg-black/40 backdrop-blur-sm border border-white/10",
             ].join(" ")}
           >
             {isLoading ? (
-              <span className="loading loading-spinner loading-sm" />
+              <span className="loading loading-spinner text-white loading-sm drop-shadow-lg" />
             ) : isPlaying ? (
-              <PauseIcon className="w-5 h-5" />
+              <PauseIcon className="w-6 h-6 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
             ) : (
-              <PlayIcon className="w-5 h-5 ml-0.5" />
+              <PlayIcon className="w-6 h-6 ml-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
             )}
           </button>
         </div>
@@ -280,7 +292,7 @@ export default function Player({ playerState, controls }: PlayerProps) {
         <div className="flex flex-col min-w-0 flex-1 px-0.5">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-sm text-white tracking-tight leading-tight truncate">
-              {playerState.trackTitle}
+              {APP_CONFIG.RADIO_NAME}
             </span>
             {/* Mini wave para mobile */}
             <div className="flex sm:hidden">
@@ -295,7 +307,7 @@ export default function Player({ playerState, controls }: PlayerProps) {
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500" />
                 </span>
                 <span className="text-[10px] font-bold text-red-400 uppercase tracking-widest">
-                  {playerState.trackArtist}
+                  TRANSMISIÓN EN VIVO
                 </span>
               </>
             ) : (
@@ -310,21 +322,22 @@ export default function Player({ playerState, controls }: PlayerProps) {
         </div>
 
         {/* ── Ondas de sonido (canvas, desktop) ──────────────── */}
-        <div className="hidden sm:flex shrink-0 items-center">
+        <div className="hidden sm:flex shrink-0 items-center wave-tricolor">
           <SoundWave isPlaying={isPlaying} width={140} height={32} />
         </div>
 
         {/* ── Control de volumen (desktop) ────────────────────── */}
-        <div className="hidden sm:flex items-center gap-2 shrink-0 pl-1">
+        <div className="hidden sm:flex items-center gap-2 shrink-0 pl-1 z-50">
           <button
             aria-label={isMuted || volume === 0 ? "Activar sonido" : "Silenciar"}
             onClick={controls.toggleMute}
-            className="flex items-center justify-center w-7 h-7 rounded-full text-white/40 hover:text-white hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+            className="relative z-50 flex items-center justify-center w-7 h-7 rounded-full text-white hover:bg-white/25 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
           >
             {isMuted || volume === 0
               ? <SpeakerQuietIcon className="w-4 h-4" />
               : <SpeakerLoudIcon className="w-4 h-4" />}
           </button>
+
           <input
             type="range"
             aria-label="Volumen"
@@ -333,7 +346,11 @@ export default function Player({ playerState, controls }: PlayerProps) {
             step={0.02}
             value={isMuted ? 0 : volume}
             onChange={(e) => controls.setVolume(parseFloat(e.target.value))}
-            className="volume-slider w-20"
+            className="w-20 relative z-50 cursor-pointer appearance-none bg-transparent outline-none
+      [&::-webkit-slider-runnable-track]:h-1.5 [&::-webkit-slider-runnable-track]:rounded-full
+      [&::-webkit-slider-runnable-track]:bg-gradient-to-r [&::-webkit-slider-runnable-track]:from-yellow-400 [&::-webkit-slider-runnable-track]:via-blue-500 [&::-webkit-slider-runnable-track]:to-red-500
+      [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full
+      hover:[&::-webkit-slider-thumb]:scale-125 transition-all"
           />
         </div>
 
@@ -341,3 +358,4 @@ export default function Player({ playerState, controls }: PlayerProps) {
     </div>
   );
 }
+

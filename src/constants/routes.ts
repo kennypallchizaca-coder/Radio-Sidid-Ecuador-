@@ -23,8 +23,8 @@ export type SectionId = typeof SECTION_IDS[keyof typeof SECTION_IDS];
 // ── Ítems del menú de navegación ──────────────────────────────
 
 export const NAV_ITEMS: { id: SectionId; label: string; isExternal?: boolean; url?: string }[] = [
-  { id: SECTION_IDS.INICIO, label: "Inicio" },
-  { id: SECTION_IDS.ESCUCHANOS, label: "Escúchanos en Vivo" },
+  { id: SECTION_IDS.ESCUCHANOS, label: "Inicio" },
+  { id: SECTION_IDS.INICIO, label: "Escúchanos en Vivo" },
   { id: SECTION_IDS.CONTACTO, label: "Escríbenos" },
   { id: SECTION_IDS.FACEBOOK, label: "Facebook", isExternal: true, url: "https://www.facebook.com/profile.php?id=100067331525448" },
   { id: SECTION_IDS.NUESTRA_APP, label: "Nuestra App" },

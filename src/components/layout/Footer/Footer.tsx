@@ -73,7 +73,7 @@ const Footer = () => {
                 loading="lazy"
               />
             </div>
-            <h3 className="text-2xl font-black text-primary tracking-tight">
+            <h3 className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-blue-500 to-red-500">
               {APP_CONFIG.RADIO_NAME}
             </h3>
           </div>
@@ -187,7 +187,7 @@ const Footer = () => {
           &copy; {currentYear()} {APP_CONFIG.RADIO_NAME}. Todos los derechos reservados.
         </p>
         <p>
-          Música y Cultura desde el corazón de los Andes.
+          Música y Cultura desde el corazón.
         </p>
       </div>
     </footer>

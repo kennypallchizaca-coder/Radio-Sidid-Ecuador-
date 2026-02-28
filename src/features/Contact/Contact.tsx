@@ -11,10 +11,6 @@ const IconFacebook = () => <Icon><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 
 const IconYouTube = () => <Icon><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" /></Icon>;
 const IconInstagram = () => <Icon><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" /></Icon>;
 
-/* ── Retro helpers ─────────────────────────────────────────── */
-const retroShadow = "shadow-[5px_5px_0_#000]";
-const retroShadowHover = "hover:shadow-[7px_7px_0_#000]";
-
 /* ── Datos de cards ────────────────────────────────────────── */
 const CARDS = [
   {
@@ -68,75 +64,74 @@ export default function Contact() {
     >
       <div className="max-w-5xl mx-auto px-5 sm:px-8 relative z-10">
 
-        {/* ── Header retro ─────────────────────────────────── */}
+        {/* ── Header Moderno ─────────────────────────────────── */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-12 sm:mb-16"
+          className="text-center mb-12 sm:mb-16 flex flex-col items-center gap-4"
         >
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
+            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+            <span className="text-xs font-semibold tracking-widest uppercase text-white/70">En vivo para ti</span>
+          </div>
+
           <h2
             id="contact-title"
-            className={`inline-block text-2xl sm:text-4xl font-black text-gray-900 bg-amber-400 px-6 py-3 border-4 border-gray-900 rounded-lg ${retroShadow} uppercase tracking-wider`}
+            className="text-4xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-blue-500 to-red-500 tracking-tight"
           >
-            Conéctate
+            Conéctate con<br />Nosotros
           </h2>
-          <p className={`mt-5 inline-block text-sm sm:text-base font-bold text-white bg-pink-500 px-4 py-2 border-2 border-gray-900 rounded-sm ${retroShadow}`}>
-            Síguenos, escríbenos o llámanos
+          <p className="text-base sm:text-lg text-white/50 max-w-xl mx-auto font-medium">
+            Síguenos en nuestras redes sociales para no perderte ninguna novedad, eventos especiales y las mejores mezclas.
           </p>
         </motion.div>
 
-        {/* ── 4 cards retro grid (2×2) ────────────────────── */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-6">
+        {/* ── Contact Pills Minimalistas ────────────────────── */}
+        <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mt-10">
           {CARDS.map((card, i) => (
             <motion.a
               key={card.name}
               href={card.href}
               target="_blank"
               rel="noopener noreferrer"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.35, delay: i * 0.1 }}
-              className={`group relative border-3 sm:border-4 border-gray-900 rounded-xl bg-gray-100 shadow-[3px_3px_0_#000] sm:${retroShadow} hover:shadow-[5px_5px_0_#000] sm:${retroShadowHover} transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] active:shadow-[2px_2px_0_#000] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2`}
+              transition={{ duration: 0.4, delay: i * 0.1, type: "spring", bounce: 0.5 }}
+              className="group relative flex items-center gap-3 px-6 py-3 rounded-full overflow-hidden bg-white/[0.04] border border-white/10 hover:border-white/30 transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl shadow-black/40"
             >
-              {/* Icon container + Tag label */}
-              <div className="flex items-center gap-2.5 sm:gap-4 p-3 sm:p-5">
-                <div
-                  className={`w-10 h-10 sm:w-14 sm:h-14 rounded-lg border-3 sm:border-4 border-gray-900 ${card.bg} flex items-center justify-center text-white shrink-0 shadow-[2px_2px_0_#000] sm:${retroShadow} group-hover:scale-110 transition-transform duration-300`}
-                >
-                  {card.icon}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-1.5 flex-wrap">
-                    <span className={`${card.labelBg} text-gray-900 font-black text-[9px] sm:text-[11px] uppercase tracking-wider px-1.5 sm:px-2.5 py-0.5 border sm:border-2 border-gray-900 rounded-sm`}>
-                      {card.name}
-                    </span>
-                  </div>
-                  <p className="text-gray-600 text-[10px] sm:text-xs font-semibold truncate">{card.desc}</p>
-                </div>
+              {/* Halógeno Background en Hover */}
+              <div
+                className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300 pointer-events-none"
+                style={{ background: `linear-gradient(135deg, ${card.color}, transparent)` }}
+              />
+
+              {/* Icono Reducido */}
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center text-white shrink-0 shadow-lg group-hover:rotate-12 transition-transform duration-300 [&>svg]:w-5 [&>svg]:h-5"
+                style={{ background: card.bg, boxShadow: `0 4px 12px -2px ${card.color}80` }}
+              >
+                {card.icon}
               </div>
 
-              {/* CTA bar */}
-              <div
-                className="border-t-3 sm:border-t-4 border-gray-900 px-3 sm:px-5 py-2 sm:py-3 flex items-center justify-between rounded-b-[8px] transition-colors duration-300"
-                style={{ background: `${card.color}18` }}
-              >
-                <span className="text-[9px] sm:text-xs font-black uppercase tracking-widest text-gray-900">
-                  {card.cta}
-                </span>
-                <svg
-                  className="w-4 h-4 sm:w-5 sm:h-5 text-gray-900 group-hover:translate-x-1.5 transition-transform duration-300"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={3}
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
+              {/* Texto */}
+              <div className="flex flex-col pr-2">
+                <span className="text-sm font-bold text-white leading-tight">{card.name}</span>
+                <span className="text-[10px] text-white/50 font-medium uppercase tracking-widest">{card.cta}</span>
               </div>
+
+              {/* Chevron derecho de interacción */}
+              <svg
+                className="w-4 h-4 ml-1 text-white/30 group-hover:text-white transition-all group-hover:translate-x-1"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
             </motion.a>
           ))}
         </div>

@@ -3,8 +3,6 @@ import { APP_CONFIG } from "@/config";
 import { MUSIC_TRACKS } from "@/config/musica.config";
 
 export type PlayerStatus = "idle" | "loading" | "playing" | "paused" | "error";
-
-/** Modo de reproducción: stream en vivo o playlist local */
 export type PlayerMode = "live" | "music";
 
 export interface AudioPlayerState {
@@ -15,11 +13,8 @@ export interface AudioPlayerState {
   errorMessage: string;
   volume: number;
   isMuted: boolean;
-  /** Modo actual: "live" = stream real, "music" = playlist local */
   mode: PlayerMode;
-  /** Nombre del track actual (o nombre de la radio si es live) */
   trackTitle: string;
-  /** Artista del track actual */
   trackArtist: string;
 }
 
@@ -29,55 +24,41 @@ export interface AudioPlayerControls {
   toggleMute: () => void;
 }
 
-// ── Intervalo de polling para live-status.json (30 seg) ─────
 const POLL_INTERVAL = 30_000;
 
-// ── Claves de sessionStorage para persistir reproducción ─────
-const SS_TRACK_INDEX = "radio_trackIndex";
-const SS_CURRENT_TIME = "radio_currentTime";
-const SS_WAS_PLAYING = "radio_wasPlaying";
-const SS_MODE = "radio_mode";
+// ─── Lógica de simulación de "Radio" ─────────────────────────
+// Definimos una "programación" fija basada en duraciones estimadas
+// Si la primera canción dura unos ~60 mins y la segunda X mins, el bucle total dura Y.
+// Para propósitos de este demo "sin interrupciones", asumiremos un ciclo de 2 horas.
+const CYCLE_DURATION_MS = 2 * 60 * 60 * 1000; // 2 horas de ciclo continuo
 
-/** Guardar estado de reproducción en sessionStorage */
-function savePlaybackState(trackIndex: number, currentTime: number, mode: PlayerMode) {
-  try {
-    sessionStorage.setItem(SS_TRACK_INDEX, String(trackIndex));
-    sessionStorage.setItem(SS_CURRENT_TIME, String(currentTime));
-    sessionStorage.setItem(SS_WAS_PLAYING, "true");
-    sessionStorage.setItem(SS_MODE, mode);
-  } catch { /* quota exceeded, ignore */ }
+function getSimulatedPlaybackState() {
+  const now = Date.now();
+  // Posición del milisegundo dentro de nuestro ciclo infinito de X horas
+  const cycleTimeMs = now % CYCLE_DURATION_MS;
+
+  // Calculamos en qué punto de nuestra "playlist virtual" estamos.
+  // Como no tenemos duraciones exactas le daremos a todas las canciones una misma tajada hipotética del pastel
+  // o asumimos duraciones fijas.
+  const timePerTrackMs = CYCLE_DURATION_MS / Math.max(1, MUSIC_TRACKS.length);
+
+  const currentTrackIndex = Math.floor(cycleTimeMs / timePerTrackMs);
+  const currentTimeMsInTrack = cycleTimeMs % timePerTrackMs;
+
+  // Convertimos a segundos (lo que consume del Audio.currentTime)
+  return {
+    trackIndex: Math.min(currentTrackIndex, MUSIC_TRACKS.length - 1), // safety boundary
+    progressTimeSeconds: currentTimeMsInTrack / 1000
+  };
 }
 
-/** Leer estado guardado */
-function loadPlaybackState(): { trackIndex: number; currentTime: number; wasPlaying: boolean; mode: PlayerMode } | null {
-  try {
-    const wasPlaying = sessionStorage.getItem(SS_WAS_PLAYING) === "true";
-    if (!wasPlaying) return null;
-    const trackIndex = parseInt(sessionStorage.getItem(SS_TRACK_INDEX) ?? "0", 10);
-    const currentTime = parseFloat(sessionStorage.getItem(SS_CURRENT_TIME) ?? "0");
-    const mode = (sessionStorage.getItem(SS_MODE) as PlayerMode) ?? "music";
-    return { trackIndex, currentTime, wasPlaying, mode };
-  } catch { return null; }
-}
-
-/** Limpiar estado guardado */
-function clearPlaybackState() {
-  try {
-    sessionStorage.removeItem(SS_TRACK_INDEX);
-    sessionStorage.removeItem(SS_CURRENT_TIME);
-    sessionStorage.removeItem(SS_WAS_PLAYING);
-    sessionStorage.removeItem(SS_MODE);
-  } catch { /* ignore */ }
-}
 
 /**
  * Hook personalizado para controlar el reproductor de audio.
  *
- * COMPORTAMIENTO:
- *   - Consulta /live-status.json cada 30 seg
- *   - Si { "live": true }  → conecta al STREAM_URL real
- *   - Si { "live": false } → reproduce música de public/musica/ en playlist
- *   - El usuario NO nota la diferencia, siempre ve "En vivo"
+ * SIMULACIÓN EN VIVO:
+ *   - Obtiene el Timestamp actual.
+ *   - Usa módulo matemático para "engancharse" a una parte de la canción correspondiente al minuto exacto actual en un bucle cerrado de varias horas, logrando que siempre al darle play entres a una zona de programación que coincidiría con la radio de fondo o la emisora general.
  */
 export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
   // ─── Elemento Audio ─────────────────────────────────────────
@@ -90,14 +71,16 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
 
   const audioRef = useRef(audio);
 
-  /** Intentar play() ignorando errores transitorios del browser */
+  // ── Estado ─────────────────────────────────────────────────────────────────
+  const [status, setStatus] = useState<PlayerStatus>("idle");
+  const [volume, setVolumeState] = useState<number>(0.75);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+
   const safePlay = useCallback((a: HTMLAudioElement) => {
     const p = a.play();
     if (p !== undefined) {
       p.catch((err: DOMException) => {
-        // AbortError = el browser canceló play (ej. src cambió rápido) → ignorar
         if (err.name === "AbortError") return;
-        // NotAllowedError = falta interacción del usuario → reintentar al próximo click
         if (err.name === "NotAllowedError") {
           setStatus("idle");
           return;
@@ -107,22 +90,17 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
     }
   }, []);
 
-  // ─── Estado ─────────────────────────────────────────────────
-  const [status, setStatus] = useState<PlayerStatus>("idle");
-  const [volume, setVolumeState] = useState<number>(0.75);
-  const [isMuted, setIsMuted] = useState<boolean>(false);
-  const savedState = useMemo(() => loadPlaybackState(), []);
-
   const [mode, setMode] = useState<PlayerMode>(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("live") === "true") return "live";
     if (params.get("live") === "false") return "music";
-    if (savedState) return savedState.mode;
     return "music";
   });
-  const [trackIndex, setTrackIndex] = useState(() => savedState?.trackIndex ?? 0);
 
-  // Refs para acceso estable en callbacks
+  // Inicializamos con simulación actual
+  const [trackIndex, setTrackIndex] = useState(() => getSimulatedPlaybackState().trackIndex);
+
+  // Refs
   const modeRef = useRef(mode);
   const trackIndexRef = useRef(trackIndex);
   const statusRef = useRef(status);
@@ -133,7 +111,6 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
 
   // ─── Polling de live status ─────────────────────────────────
   useEffect(() => {
-    // Si viene forzado por URL, no hacer polling
     const params = new URLSearchParams(window.location.search);
     if (params.get("live") === "true" || params.get("live") === "false") {
       return;
@@ -159,23 +136,40 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
     return () => { mounted = false; clearInterval(interval); };
   }, []);
 
-  // ─── Cuando cambia el modo mientras reproduce → cambiar fuente ──
+  // ─── Cambio entre Live / Local ─────────────────────────────
   useEffect(() => {
     const a = audioRef.current;
     const wasPlaying = statusRef.current === "playing" || statusRef.current === "loading";
 
-    if (!wasPlaying) return; // si no estaba reproduciendo, no hacer nada
+    if (!wasPlaying) return;
 
     if (mode === "live") {
-      // Cambiar al stream real
       a.src = APP_CONFIG.STREAM_URL;
+      setStatus("loading");
       safePlay(a);
     } else {
-      // Cambiar a música local
-      const track = MUSIC_TRACKS[trackIndexRef.current];
+      const simulatedState = getSimulatedPlaybackState();
+      setTrackIndex(simulatedState.trackIndex);
+
+      const track = MUSIC_TRACKS[simulatedState.trackIndex];
       if (track) {
         a.src = `/musica/${encodeURIComponent(track.file)}`;
-        safePlay(a);
+
+        const applySeek = () => {
+          // Si pasamos la duracion el audio terminará, validamos.
+          if (a.duration && a.duration > simulatedState.progressTimeSeconds) {
+            a.currentTime = simulatedState.progressTimeSeconds;
+          } else if (a.duration) {
+            // Si el cálculo dió más segundos de los que tiene la canción,
+            // hacemos un módulo interno con la duracion de la canción.
+            a.currentTime = simulatedState.progressTimeSeconds % a.duration;
+          }
+          setStatus("loading");
+          safePlay(a);
+          a.removeEventListener("loadedmetadata", applySeek);
+        };
+        a.addEventListener("loadedmetadata", applySeek);
+        a.load();
       }
     }
   }, [mode, safePlay]);
@@ -190,161 +184,104 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
     const a = audioRef.current;
 
     const handleWaiting = () => setStatus("loading");
-    const handlePlaying = () => {
-      // Solo marcar "playing" si no está silenciado (simulando pausa)
-      if (!a.muted) setStatus("playing");
-    };
-    const handlePause   = () => {
-      // Solo marcar "paused" si realmente se pausó (no cuando solo muteamos)
-      if (a.muted && !a.paused) return; // está muteado pero corriendo → no cambiar
-      setStatus("paused");
-    };
-    const handleError   = () => {
-      // En modo música, intentar siguiente track en vez de error
+    const handlePlaying = () => setStatus("playing");
+    const handlePause = () => setStatus("paused");
+
+    const handleError = () => {
       if (modeRef.current === "music" && MUSIC_TRACKS.length > 1) {
-        setTrackIndex((prev) =>
-          prev < MUSIC_TRACKS.length - 1 ? prev + 1 : 0
-        );
+        setTrackIndex((prev) => (prev < MUSIC_TRACKS.length - 1 ? prev + 1 : 0));
         return;
       }
       setStatus("error");
       a.src = "";
     };
-    const handleStalled = () => setStatus("loading");
-    const handleEnded = () => {
-      // Solo en modo música: avanzar al siguiente track
-      if (modeRef.current === "music") {
-        setTrackIndex((prev) =>
-          prev < MUSIC_TRACKS.length - 1 ? prev + 1 : 0
-        );
-      }
-    };
 
-    /** Guardar posición mientras reproduce (no cuando está muteado/pausado) */
-    const handleTimeUpdate = () => {
-      if (modeRef.current === "music" && a.currentTime > 0 && !a.muted) {
-        savePlaybackState(trackIndexRef.current, a.currentTime, modeRef.current);
+    // Al acabar canción local avanzas secuencialmente de forma real
+    const handleEnded = () => {
+      if (modeRef.current === "music") {
+        const currentIdx = trackIndexRef.current;
+        const nextIdx = currentIdx < MUSIC_TRACKS.length - 1 ? currentIdx + 1 : 0;
+
+        setTrackIndex(nextIdx);
+
+        const track = MUSIC_TRACKS[nextIdx];
+        if (track) {
+          a.src = `/musica/${encodeURIComponent(track.file)}`;
+          a.currentTime = 0;
+          safePlay(a);
+        }
       }
     };
 
     a.addEventListener("waiting", handleWaiting);
     a.addEventListener("playing", handlePlaying);
-    a.addEventListener("pause",   handlePause);
-    a.addEventListener("error",   handleError);
-    a.addEventListener("stalled", handleStalled);
-    a.addEventListener("ended",   handleEnded);
-    a.addEventListener("timeupdate", handleTimeUpdate);
+    a.addEventListener("pause", handlePause);
+    a.addEventListener("error", handleError);
+    a.addEventListener("ended", handleEnded);
 
     return () => {
       a.removeEventListener("waiting", handleWaiting);
       a.removeEventListener("playing", handlePlaying);
-      a.removeEventListener("pause",   handlePause);
-      a.removeEventListener("error",   handleError);
-      a.removeEventListener("stalled", handleStalled);
-      a.removeEventListener("ended",   handleEnded);
-      a.removeEventListener("timeupdate", handleTimeUpdate);
+      a.removeEventListener("pause", handlePause);
+      a.removeEventListener("error", handleError);
+      a.removeEventListener("ended", handleEnded);
     };
-  }, [audioRef]);
+  }, [audioRef, safePlay]);
 
-  // ─── Auto-play siguiente track en modo música ──────────────
-  useEffect(() => {
-    if (modeRef.current !== "music") return;
-    const a = audioRef.current;
-    // También avanzar si el audio está muteado (simulando pausa) — sigue corriendo
-    const isActive = statusRef.current === "playing" || statusRef.current === "loading"
-      || (statusRef.current === "paused" && !a.paused);
-    const track = MUSIC_TRACKS[trackIndex];
-    if (!track || !isActive) return;
-
-    const wasMuted = a.muted;
-    a.src = `/musica/${encodeURIComponent(track.file)}`;
-    a.muted = wasMuted; // preservar estado mute
-    a.load();
-    safePlay(a);
-  }, [trackIndex, safePlay]);
-
-  // ─── Restaurar reproducción tras recarga ────────────────────
-  useEffect(() => {
-    if (!savedState || !savedState.wasPlaying) return;
-    const a = audioRef.current;
-
-    if (savedState.mode === "live") {
-      // En vivo: reconectar al stream (no hay posición que restaurar)
-      a.src = APP_CONFIG.STREAM_URL;
-      setStatus("loading");
-      safePlay(a);
-    } else {
-      // Música: restaurar track y posición exacta
-      const track = MUSIC_TRACKS[savedState.trackIndex];
-      if (track) {
-        a.src = `/musica/${encodeURIComponent(track.file)}`;
-        a.load();
-
-        const handleCanPlay = () => {
-          a.currentTime = savedState.currentTime;
-          setStatus("loading");
-          safePlay(a);
-          a.removeEventListener("canplay", handleCanPlay);
-        };
-        a.addEventListener("canplay", handleCanPlay);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // ─── Toggle play/pause ─────────────────────────────────────
-  // En modo música simula "en vivo": pausar = silenciar (el audio
-  // sigue corriendo en background para que no se quede estancado).
-  // En modo live real: desconecta del stream al pausar.
+  // ─── Toggle play/pause (Sincronización Mágica) ────────────
   const toggle = useCallback(() => {
     const a = audioRef.current;
 
     if (status === "playing" || status === "loading") {
-      if (modeRef.current === "live") {
-        // Stream real: desconectar
-        a.pause();
-        a.src = "";
-        clearPlaybackState();
-        setStatus("paused");
-      } else {
-        // Música local simulando "en vivo": solo silenciar
-        a.muted = true;
-        clearPlaybackState();
-        setStatus("paused");
-        // El audio sigue reproduciéndose en segundo plano (muted)
-      }
+      a.pause();
+      if (modeRef.current === "live") a.src = "";
+      setStatus("paused");
     } else {
       if (modeRef.current === "live") {
-        // Conectar al stream real
         a.src = APP_CONFIG.STREAM_URL;
         setStatus("loading");
         safePlay(a);
       } else {
-        // Música local: si ya estaba corriendo (muted), solo desmuteamos
-        if (a.src && !a.paused && !a.ended) {
-          a.muted = false;
-          a.volume = isMuted ? 0 : volume;
-          setStatus("playing");
-        } else {
-          // Primera reproducción o acabó el track
-          const track = MUSIC_TRACKS[trackIndexRef.current];
-          if (track) {
-            const expectedSrc = `/musica/${encodeURIComponent(track.file)}`;
-            if (!a.src || !a.src.includes(encodeURIComponent(track.file))) {
-              a.src = expectedSrc;
-            }
-          } else {
-            setStatus("error");
-            return;
+        // Obtenemos la programación virtual JUSTO AL DARLE AL PLAY
+        const simulatedState = getSimulatedPlaybackState();
+        setTrackIndex(simulatedState.trackIndex);
+
+        const track = MUSIC_TRACKS[simulatedState.trackIndex];
+        if (track) {
+          const expectedSrc = `/musica/${encodeURIComponent(track.file)}`;
+
+          if (!a.src.includes(encodeURIComponent(track.file))) {
+            a.src = expectedSrc;
           }
-          a.muted = false;
-          a.volume = isMuted ? 0 : volume;
-          setStatus("loading");
-          safePlay(a);
+
+          // Tratamos de buscar la metadata para ajustar el cabezal de reproduccion antes de emitir sonido
+          if (a.readyState >= 1) { // 1 = HAVE_METADATA
+            if (a.duration && a.duration > simulatedState.progressTimeSeconds) {
+              a.currentTime = simulatedState.progressTimeSeconds;
+            } else if (a.duration) {
+              a.currentTime = simulatedState.progressTimeSeconds % a.duration;
+            }
+            setStatus("loading");
+            safePlay(a);
+          } else {
+            // Si el buffer no se ha cargado hay que esperar el loadedmetadata
+            const applySeek = () => {
+              if (a.duration && a.duration > simulatedState.progressTimeSeconds) {
+                a.currentTime = simulatedState.progressTimeSeconds;
+              } else if (a.duration) {
+                a.currentTime = simulatedState.progressTimeSeconds % a.duration;
+              }
+              setStatus("loading");
+              safePlay(a);
+              a.removeEventListener("loadedmetadata", applySeek);
+            };
+            a.addEventListener("loadedmetadata", applySeek);
+            a.load();
+          }
         }
       }
     }
-  }, [status, volume, isMuted, audioRef, safePlay]);
+  }, [status, audioRef, safePlay]);
 
   /** Ajusta el volumen (0.0 – 1.0) */
   const setVolume = useCallback((vol: number) => {
@@ -358,21 +295,15 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
     setIsMuted((prev) => !prev);
   }, []);
 
-  // ─── Info del track actual ─────────────────────────────────
-  const currentTrack = MUSIC_TRACKS[trackIndex];
-  const trackTitle = mode === "live"
-    ? APP_CONFIG.RADIO_NAME
-    : (currentTrack?.title ?? APP_CONFIG.RADIO_NAME);
-  const trackArtist = mode === "live"
-    ? APP_CONFIG.SLOGAN
-    : (currentTrack?.artist ?? "Radio Sisid Ecuador");
+  // ─── Info del track constante (Live Radio Mode) ───────────────
+  const trackTitle = APP_CONFIG.RADIO_NAME;
+  const trackArtist = "TRANSMISIÓN EN VIVO";
 
-  // ─── Estado derivado ────────────────────────────────────────
   const state: AudioPlayerState = {
     status,
     isPlaying: status === "playing",
     isLoading: status === "loading",
-    hasError:  status === "error",
+    hasError: status === "error",
     errorMessage: mode === "live"
       ? "La radio está fuera del aire. Intenta más tarde."
       : "No se pudo reproducir la música. Intenta de nuevo.",
