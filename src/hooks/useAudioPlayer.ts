@@ -230,11 +230,22 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
       }
     };
 
+    const handleSeeking = () => {
+      if (modeRef.current === "music") {
+        const freshState = getSimulatedPlaybackState();
+        // Evitar que el usuario adelante manualmente la música (mantenemos el "Live" feel)
+        if (Math.abs(a.currentTime - freshState.progressTimeSeconds) > 2) {
+          a.currentTime = freshState.progressTimeSeconds;
+        }
+      }
+    };
+
     a.addEventListener("waiting", handleWaiting);
     a.addEventListener("playing", handlePlaying);
     a.addEventListener("pause", handlePause);
     a.addEventListener("error", handleError);
     a.addEventListener("ended", handleEnded);
+    a.addEventListener("seeking", handleSeeking);
 
     return () => {
       a.removeEventListener("waiting", handleWaiting);
@@ -242,6 +253,7 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
       a.removeEventListener("pause", handlePause);
       a.removeEventListener("error", handleError);
       a.removeEventListener("ended", handleEnded);
+      a.removeEventListener("seeking", handleSeeking);
     };
   }, [audioRef, safePlay]);
 
@@ -318,16 +330,15 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
     setIsMuted((prev) => !prev);
   }, []);
 
-  // ─── Info del track constante (Live Radio Mode) ───────────────
-  const trackTitle = mode === "music" ? (MUSIC_TRACKS[trackIndex]?.title || APP_CONFIG.RADIO_NAME) : APP_CONFIG.RADIO_NAME;
-  const trackArtist = mode === "music" ? (MUSIC_TRACKS[trackIndex]?.artist || "Radio Sisid") : "TRANSMISIÓN EN VIVO";
+  // ─── Info del track constante (Live Radio Look) ───────────────
+  const trackTitle = APP_CONFIG.RADIO_NAME;
+  const trackArtist = "TRANSMISIÓN EN VIVO";
 
   // ─── Media Session API (Para Móvil/Escritorio) ─────────────
-  useEffect(() => {
+  const updateMediaSession = useCallback(() => {
     if (!("mediaSession" in navigator)) return;
 
     try {
-      // Configuramos Metadata
       navigator.mediaSession.metadata = new MediaMetadata({
         title: trackTitle,
         artist: trackArtist,
@@ -338,33 +349,57 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
         ],
       });
 
-      // Estado de reproducción
       navigator.mediaSession.playbackState = (status === "playing" || status === "loading") ? "playing" : "paused";
 
-      // Manejadores de control (Lock Screen / Notificaciones)
+      // Forzar el look "Live" eliminando reportes de posición y duración
+      if ("setPositionState" in navigator.mediaSession) {
+        try {
+          // @ts-ignore
+          navigator.mediaSession.setPositionState({
+            duration: Infinity,
+            playbackRate: 1,
+            position: 0
+          });
+        } catch (e) {
+          try {
+            // @ts-ignore fallback para algunos Androids
+            navigator.mediaSession.setPositionState(null);
+          } catch (e2) { }
+        }
+      }
+
       navigator.mediaSession.setActionHandler("play", () => toggle());
       navigator.mediaSession.setActionHandler("pause", () => toggle());
 
-      // Si es radio en vivo, quitamos los botones de adelante/atrás para reforzar que es Live
-      if (mode === "live") {
-        navigator.mediaSession.setActionHandler("previoustrack", null);
-        navigator.mediaSession.setActionHandler("nexttrack", null);
-      } else {
-        // Podríamos mapear siguiente/anterior si quisiéramos en modo música
-        navigator.mediaSession.setActionHandler("previoustrack", null);
-        navigator.mediaSession.setActionHandler("nexttrack", null);
-      }
+      // Deshabilitar navegación y búsqueda completamente en la notificación
+      navigator.mediaSession.setActionHandler("previoustrack", null);
+      navigator.mediaSession.setActionHandler("nexttrack", null);
+      navigator.mediaSession.setActionHandler("seekto", null);
+      navigator.mediaSession.setActionHandler("seekbackward", null);
+      navigator.mediaSession.setActionHandler("seekforward", null);
+
     } catch (e) {
       console.error("MediaSession error:", e);
     }
+  }, [trackTitle, trackArtist, status, toggle]);
+
+  useEffect(() => {
+    updateMediaSession();
+
+    // Título estático para la pestaña (siempre el nombre de la radio)
+    document.title = `${APP_CONFIG.RADIO_NAME} — ${APP_CONFIG.SLOGAN}`;
+
+    const a = audioRef.current;
+    const handleEvents = () => updateMediaSession();
+
+    a.addEventListener("playing", handleEvents);
+    a.addEventListener("durationchange", handleEvents);
 
     return () => {
-      if ("mediaSession" in navigator) {
-        navigator.mediaSession.setActionHandler("play", null);
-        navigator.mediaSession.setActionHandler("pause", null);
-      }
+      a.removeEventListener("playing", handleEvents);
+      a.removeEventListener("durationchange", handleEvents);
     };
-  }, [trackTitle, trackArtist, status, mode, toggle]);
+  }, [updateMediaSession, audioRef]);
 
   const state: AudioPlayerState = {
     status,
