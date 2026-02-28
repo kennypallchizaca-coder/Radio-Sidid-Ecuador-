@@ -292,7 +292,6 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
     if (mode !== "music" || status !== "playing") return;
 
     const SYNC_INTERVAL_MS = 1000;      // Revisar cada segundo
-    const MAX_DRIFT_SECONDS = 0.5;      // Tolerancia máxima de desfase (medio segundo)
 
     const syncLoop = setInterval(() => {
       if (!a.duration) return; // Todavía no cargó del todo, ignorar
@@ -312,17 +311,28 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
       }
 
       // 2. Si es la misma pista, revisamos que el segundo actual sea preciso
-      let expectedSeconds = expectedState.progressTimeSeconds;
-      if (expectedSeconds > a.duration) {
-        expectedSeconds = expectedSeconds % a.duration;
-      }
-
+      const expectedSeconds = expectedState.progressTimeSeconds;
       const currentDrift = Math.abs(a.currentTime - expectedSeconds);
 
-      // Si se desfasó por culpa de cargar un buffer lento, forzamos un adelantamiento quirúrgico
+      // Tolerancia: 0.15s es una diferencia inaudible (eco mínimo)
+      const MAX_DRIFT_SECONDS = 0.15;
+
       if (currentDrift > MAX_DRIFT_SECONDS) {
-        // En lugar de "saltar" brusco, reajustamos suavemente forzando el segundo mágico
-        a.currentTime = expectedSeconds;
+        if (currentDrift < 1.0) {
+          // Desfase pequeño (< 1s): Ajustar la velocidad ligeramente para alcanzar sin clics abruptos
+          if (a.currentTime < expectedSeconds) {
+            a.playbackRate = 1.05; // Lo adelantamos 5%
+          } else {
+            a.playbackRate = 0.95; // Lo frenamos 5%
+          }
+        } else {
+          // Desfase grande (> 1s por internet lento o pausas): Forzar salto instantáneo
+          a.playbackRate = 1.0;
+          a.currentTime = expectedSeconds;
+        }
+      } else {
+        // Sincronización perfecta: Velocidad normal 100%
+        if (a.playbackRate !== 1.0) a.playbackRate = 1.0;
       }
 
     }, SYNC_INTERVAL_MS);
