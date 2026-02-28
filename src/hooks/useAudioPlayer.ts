@@ -283,6 +283,53 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
     }
   }, [status, audioRef, safePlay]);
 
+  // ─── Lazo de sincronización en tiempo real (Fix para drift/delay) ───
+  useEffect(() => {
+    const a = audioRef.current;
+
+    // Solo sincronizar agresivamente si estamos en modo "music" (simulación local)
+    // Para modo "live" (streaming URL real) no podemos modificar el currentTime.
+    if (mode !== "music" || status !== "playing") return;
+
+    const SYNC_INTERVAL_MS = 1000;      // Revisar cada segundo
+    const MAX_DRIFT_SECONDS = 0.5;      // Tolerancia máxima de desfase (medio segundo)
+
+    const syncLoop = setInterval(() => {
+      if (!a.duration) return; // Todavía no cargó del todo, ignorar
+
+      const expectedState = getSimulatedPlaybackState();
+
+      // 1. Si la pista cambió, la forzamos a actualizar ignorando el bucle normal
+      if (expectedState.trackIndex !== trackIndexRef.current) {
+        setTrackIndex(expectedState.trackIndex);
+        const newTrack = MUSIC_TRACKS[expectedState.trackIndex];
+        if (newTrack) {
+          a.src = `/musica/${encodeURIComponent(newTrack.file)}`;
+          a.currentTime = expectedState.progressTimeSeconds;
+          safePlay(a);
+          return;
+        }
+      }
+
+      // 2. Si es la misma pista, revisamos que el segundo actual sea preciso
+      let expectedSeconds = expectedState.progressTimeSeconds;
+      if (expectedSeconds > a.duration) {
+        expectedSeconds = expectedSeconds % a.duration;
+      }
+
+      const currentDrift = Math.abs(a.currentTime - expectedSeconds);
+
+      // Si se desfasó por culpa de cargar un buffer lento, forzamos un adelantamiento quirúrgico
+      if (currentDrift > MAX_DRIFT_SECONDS) {
+        // En lugar de "saltar" brusco, reajustamos suavemente forzando el segundo mágico
+        a.currentTime = expectedSeconds;
+      }
+
+    }, SYNC_INTERVAL_MS);
+
+    return () => clearInterval(syncLoop);
+  }, [mode, status, audioRef, safePlay]);
+
   /** Ajusta el volumen (0.0 – 1.0) */
   const setVolume = useCallback((vol: number) => {
     const clamped = Math.min(1, Math.max(0, vol));
