@@ -283,52 +283,7 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
     }
   }, [status, audioRef, safePlay]);
 
-  // ─── Lazo de sincronización en tiempo real (Fix para drift/delay) ───
-  useEffect(() => {
-    const a = audioRef.current;
 
-    // Solo sincronizar agresivamente si estamos en modo "music" (simulación local)
-    // Para modo "live" (streaming URL real) no podemos modificar el currentTime.
-    if (mode !== "music" || status !== "playing") return;
-
-    const SYNC_INTERVAL_MS = 250;      // Revisar 4 veces por segundo (muy agresivo)
-
-    const syncLoop = setInterval(() => {
-      if (!a.duration) return; // Todavía no cargó del todo, ignorar
-
-      const expectedState = getSimulatedPlaybackState();
-
-      // 1. Si la pista cambió, la forzamos a actualizar ignorando el bucle normal
-      if (expectedState.trackIndex !== trackIndexRef.current) {
-        setTrackIndex(expectedState.trackIndex);
-        const newTrack = MUSIC_TRACKS[expectedState.trackIndex];
-        if (newTrack) {
-          a.src = `/musica/${encodeURIComponent(newTrack.file)}`;
-          a.currentTime = expectedState.progressTimeSeconds;
-          if (a.playbackRate !== 1.0) a.playbackRate = 1.0;
-          safePlay(a);
-          return;
-        }
-      }
-
-      // 2. Si es la misma pista, revisamos que el segundo actual sea preciso
-      const expectedSeconds = expectedState.progressTimeSeconds;
-      const currentDrift = Math.abs(a.currentTime - expectedSeconds);
-
-      // CERO DELAY: Tolerancia microscópica (0.05s = 50 milisegundos)
-      const MAX_DRIFT_SECONDS = 0.05;
-
-      if (currentDrift > MAX_DRIFT_SECONDS) {
-        // En lugar de ser sutiles, forzamos un salto brutal e instantáneo a la hora exacta
-        a.currentTime = expectedSeconds;
-        // Restauramos velocidad por si venía alterada
-        if (a.playbackRate !== 1.0) a.playbackRate = 1.0;
-      }
-
-    }, SYNC_INTERVAL_MS);
-
-    return () => clearInterval(syncLoop);
-  }, [mode, status, audioRef, safePlay]);
 
   /** Ajusta el volumen (0.0 – 1.0) */
   const setVolume = useCallback((vol: number) => {
