@@ -32,6 +32,7 @@ export interface MusicTrack {
 export const MUSIC_TRACKS: MusicTrack[] = [
   // ─── Agrega tus tracks aquí ──────────────────────────────
   { title: "Radio Sisid Ecuador - Comparte para sus seguidores 2026", file: "Radio Sisid Ecuador la comparte para sus seguidores 2026.mp3", artist: "Radio Sisid Ecuador" },
+  { title: "Sueñomix", file: "Sueño Kañary Mix 2016 Solo lo mejor.mp3", artist: "Radio Sisid Ecuador" },
   { title: "Gigantes del Ecuador - Mix de Oro (Puro Sentimiento)", file: "Radio Sisid Ecuador 🇪🇨 GIGANTES DEL ECUADOR_ Mix de Oro (Puro Sentimiento) 💔🍺2026 [zkccNtAX0A4].mp3", artist: "Radio Sisid Ecuador" },
 ];
 

@@ -11,18 +11,18 @@ export default defineConfig({
     },
   },
   build: {
-    // Optimizar chunks para mejor carga
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom'],
-          motion: ['framer-motion'],
+          'vendor-core': ['react', 'react-dom'],
+          'vendor-ui': ['framer-motion', 'lucide-react'],
+          'vendor-three': ['three', '@react-three/fiber'],
         },
       },
     },
-    // esbuild para minificación rápida (incluido por defecto)
     minify: 'esbuild',
-    // Sin source maps en producción
     sourcemap: false,
+    cssMinify: true,
+    assetsInlineLimit: 4096, // 4kb
   },
 })

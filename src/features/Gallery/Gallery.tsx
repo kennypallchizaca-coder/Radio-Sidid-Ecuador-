@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, type PanInfo } from "framer-motion";
+import { SECTION_IDS } from "@/constants/routes";
 
 const GALLERY_IMAGES = [
     { id: 1, src: "/img/image.png", alt: "Radio Sisid Ecuador en Vivo", detail: "Escúchanos en Vivo" },
@@ -58,8 +59,8 @@ function Card({ card, index, activeIndex, totalCards }: CardProps) {
 
 export default function Gallery() {
     const [activeIndex, setActiveIndex] = useState(0);
-    const isPausedRef   = useRef(false);
-    const intervalRef   = useRef<ReturnType<typeof setInterval> | null>(null);
+    const isPausedRef = useRef(false);
+    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const autoplayDelay = 2500;
 
     const startAutoplay = useCallback(() => {
@@ -93,25 +94,25 @@ export default function Gallery() {
 
     return (
         <section
-  id="galeria"
-  aria-labelledby="gallery-title"
-  className="py-20 sm:py-28 overflow-hidden relative"
->
-  <div className="max-w-7xl mx-auto px-5 sm:px-8 mb-6 sm:mb-12 text-center">
-    <h2
-      id="gallery-title"
-      className="mt-3 font-black tracking-tighter text-base-content"
-      style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)" }}
-    >
-      Bienvenidos{" "}
-      <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-blue-500 to-red-500">
-        a Radio Sisid Ecuador
-      </span>
-    </h2>
-      <p className="mt-4 max-w-xl mx-auto text-base sm:text-lg font-medium leading-relaxed tracking-wide text-base-content/70 font-sans">
-    La mejor música ecuatoriana y del mundo, ¡todo en un solo lugar para que la disfrutes a lo grande!
-    </p>
-  </div>
+            id={SECTION_IDS.GALERIA}
+            aria-labelledby="gallery-title"
+            className="py-20 sm:py-28 overflow-hidden relative"
+        >
+            <div className="max-w-7xl mx-auto px-5 sm:px-8 mb-6 sm:mb-12 text-center">
+                <h2
+                    id="gallery-title"
+                    className="mt-3 font-black tracking-tighter text-base-content"
+                    style={{ fontSize: "clamp(1.5rem, 8vw, 3.5rem)" }}
+                >
+                    Bienvenidos{" "}
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-blue-500 to-red-500">
+                        a Radio Sisid Ecuador
+                    </span>
+                </h2>
+                <p className="mt-4 max-w-xl mx-auto text-base sm:text-lg font-medium leading-relaxed tracking-wide text-base-content/70 font-sans">
+                    La mejor música ecuatoriana y del mundo, ¡todo en un solo lugar para que la disfrutes a lo grande!
+                </p>
+            </div>
 
             <div className="w-full flex-col items-center justify-center font-sans overflow-hidden">
                 <div

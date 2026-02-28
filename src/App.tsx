@@ -13,7 +13,7 @@
 
 import { AudioProvider, useAudio } from "@/context/AudioContext";
 import { useActiveSection } from "@/hooks/useActiveSection";
-import { Header, Player } from "@/components/layout";
+import { Header, Player, ScrollToTop } from "@/components/layout";
 import HomePage from "@/pages/Home/HomePage";
 import { lazy, Suspense, useState, useEffect } from "react";
 
@@ -59,6 +59,9 @@ function AppShell() {
         <main id="main-content" className="flex-grow w-full" role="main">
           <HomePage />
         </main>
+
+        {/* Botón flotante para volver arriba */}
+        <ScrollToTop />
 
         {/* Reproductor fijo — siempre montado para no interrumpir el audio */}
         <Player playerState={playerState} controls={controls} />

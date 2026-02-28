@@ -209,11 +209,11 @@ export default function Player({ playerState, controls }: PlayerProps) {
   return (
     <div className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 w-[94vw] sm:w-auto transition-all duration-500 ease-out">
 
-      {/* Glow ambiental bajo el reproductor */}
+      {/* Glow ambiental bajo el reproductor (Tricolor) */}
       {isPlaying && (
         <div
           aria-hidden="true"
-          className="absolute -z-10 inset-x-4 -bottom-2 h-8 rounded-full bg-red-600/30 blur-2xl animate-pulse pointer-events-none"
+          className="absolute -z-10 inset-x-4 -bottom-4 h-12 rounded-full bg-gradient-to-r from-yellow-500/20 via-blue-600/20 to-red-600/20 blur-3xl animate-pulse pointer-events-none"
         />
       )}
 

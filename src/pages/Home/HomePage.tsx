@@ -4,6 +4,7 @@
  * Secciones: Gallery → Hero → AppPromo → Contact → Footer
  */
 
+import { SECTION_IDS } from "@/constants/routes";
 import { useAudio } from "@/context/AudioContext";
 import { Hero, Gallery, Contact, AppPromo } from "@/features";
 import { Footer } from "@/components/layout";
@@ -17,7 +18,7 @@ export default function HomePage() {
       <Gallery />
 
       {/* Ancla para "Escúchanos en Vivo" */}
-      <div id="escuchanos" />
+      <div id={SECTION_IDS.ESCUCHANOS} />
 
       {/* Sección 2 — Hero con botón de play gigante */}
       <Hero playerState={playerState} controls={controls} />

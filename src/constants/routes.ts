@@ -11,9 +11,10 @@
 // ── Secciones SPA (single page, scroll) ───────────────────────
 
 export const SECTION_IDS = {
+  GALERIA: "galeria",
   INICIO: "inicio",
-  ESCUCHANOS: "escuchanos",
-  CONTACTO: "contacto",       // Escríbenos
+  ESCUCHANOS: "escuchanos", // Mantener por compatibilidad si se usa en algún scroll manual
+  CONTACTO: "contacto",
   FACEBOOK: "facebook",
   NUESTRA_APP: "nuestra_app",
 } as const;
@@ -23,7 +24,7 @@ export type SectionId = typeof SECTION_IDS[keyof typeof SECTION_IDS];
 // ── Ítems del menú de navegación ──────────────────────────────
 
 export const NAV_ITEMS: { id: SectionId; label: string; isExternal?: boolean; url?: string }[] = [
-  { id: SECTION_IDS.ESCUCHANOS, label: "Inicio" },
+  { id: SECTION_IDS.GALERIA, label: "Inicio" },
   { id: SECTION_IDS.INICIO, label: "Escúchanos en Vivo" },
   { id: SECTION_IDS.CONTACTO, label: "Escríbenos" },
   { id: SECTION_IDS.FACEBOOK, label: "Facebook", isExternal: true, url: "https://www.facebook.com/profile.php?id=100067331525448" },

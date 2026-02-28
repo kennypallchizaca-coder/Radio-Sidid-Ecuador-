@@ -22,7 +22,8 @@ interface HeaderProps {
 
 // Configuración de íconos con colores únicos por sección
 const NAV_ICON_CONFIG: Record<string, { icon: LucideIcon; color: string; bg: string }> = {
-  inicio: { icon: Home, color: "text-sky-500", bg: "bg-sky-500/10" },
+  galeria: { icon: Home, color: "text-sky-500", bg: "bg-sky-500/10" },
+  inicio: { icon: Radio, color: "text-red-500", bg: "bg-red-500/10" },
   escuchanos: { icon: Headphones, color: "text-violet-500", bg: "bg-violet-500/10" },
   contacto: { icon: MessageCircle, color: "text-emerald-500", bg: "bg-emerald-500/10" },
   facebook: { icon: Facebook, color: "text-blue-500", bg: "bg-blue-500/10" },
@@ -39,8 +40,16 @@ export default function Header({ activeSection }: HeaderProps) {
       window.open(url, "_blank", "noopener,noreferrer");
       return;
     }
-    setIsMobileMenuOpen(false);
-    scrollToSection(id);
+
+    if (isMobileMenuOpen) {
+      setIsMobileMenuOpen(false);
+      // Pequeño delay para que el menú se cierre y el layout se estabilice antes de calcular el scroll
+      setTimeout(() => {
+        scrollToSection(id);
+      }, 300);
+    } else {
+      scrollToSection(id);
+    }
   };
 
   return (
@@ -185,9 +194,9 @@ export default function Header({ activeSection }: HeaderProps) {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: "easeInOut" }}
-            className="overflow-hidden lg:hidden"
+            className="overflow-hidden lg:hidden bg-black/95 backdrop-blur-3xl border-t border-white/10"
           >
-            <div className="px-4 sm:px-6 lg:px-8 pb-4 pt-1 border-t border-neutral-content/10">
+            <div className="px-4 sm:px-6 lg:px-8 pb-6 pt-2">
               {/* Indicador EN VIVO mobile */}
               <div className="flex items-center gap-1.5 mb-3 px-2.5 py-1.5 rounded-full bg-error/10 border border-error/20 w-fit">
                 <span className="relative flex h-2 w-2">

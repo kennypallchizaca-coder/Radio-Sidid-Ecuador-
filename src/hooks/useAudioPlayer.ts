@@ -45,10 +45,12 @@ function getSimulatedPlaybackState() {
   const currentTrackIndex = Math.floor(cycleTimeMs / timePerTrackMs);
   const currentTimeMsInTrack = cycleTimeMs % timePerTrackMs;
 
-  // Convertimos a segundos (lo que consume del Audio.currentTime)
+  // Convertimos a segundos y aplicamos el offset de 20 segundos solicitado por el usuario
+  const startOffsetSeconds = 20;
+
   return {
     trackIndex: Math.min(currentTrackIndex, MUSIC_TRACKS.length - 1), // safety boundary
-    progressTimeSeconds: currentTimeMsInTrack / 1000
+    progressTimeSeconds: (currentTimeMsInTrack / 1000) + startOffsetSeconds
   };
 }
 
@@ -66,6 +68,8 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
     const a = new Audio();
     a.preload = "none";
     a.crossOrigin = "anonymous";
+    // Propiedades vitales en móvil para evitar retrasos y pantallas completas (iOS)
+    a.setAttribute("playsinline", "true");
     return a;
   }, []);
 
@@ -156,13 +160,12 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
         a.src = `/musica/${encodeURIComponent(track.file)}`;
 
         const applySeek = () => {
-          // Si pasamos la duracion el audio terminará, validamos.
-          if (a.duration && a.duration > simulatedState.progressTimeSeconds) {
-            a.currentTime = simulatedState.progressTimeSeconds;
+          // Acá es seguro pedir un nuevo frame para no lidiar con latencia del evento anterior
+          const freshState = getSimulatedPlaybackState();
+          if (a.duration && a.duration > freshState.progressTimeSeconds) {
+            a.currentTime = freshState.progressTimeSeconds;
           } else if (a.duration) {
-            // Si el cálculo dió más segundos de los que tiene la canción,
-            // hacemos un módulo interno con la duracion de la canción.
-            a.currentTime = simulatedState.progressTimeSeconds % a.duration;
+            a.currentTime = freshState.progressTimeSeconds % a.duration;
           }
           setStatus("loading");
           safePlay(a);
@@ -172,7 +175,7 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
         a.load();
       }
     }
-  }, [mode, safePlay]);
+  }, [mode, safePlay, setStatus, setTrackIndex]);
 
   // ─── Sincronizar volumen ────────────────────────────────────
   useEffect(() => {
@@ -207,8 +210,22 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
         const track = MUSIC_TRACKS[nextIdx];
         if (track) {
           a.src = `/musica/${encodeURIComponent(track.file)}`;
-          a.currentTime = 0;
-          safePlay(a);
+
+          // El usuario desea que las canciones empiecen en el segundo 20
+          const startOffset = 20;
+
+          const onMetadata = () => {
+            if (a.duration && a.duration > startOffset) {
+              a.currentTime = startOffset;
+            } else {
+              a.currentTime = 0;
+            }
+            safePlay(a);
+            a.removeEventListener("loadedmetadata", onMetadata);
+          };
+
+          a.addEventListener("loadedmetadata", onMetadata);
+          a.load();
         }
       }
     };
@@ -242,11 +259,12 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
         setStatus("loading");
         safePlay(a);
       } else {
-        // Obtenemos la programación virtual JUSTO AL DARLE AL PLAY
-        const simulatedState = getSimulatedPlaybackState();
-        setTrackIndex(simulatedState.trackIndex);
+        // En celular, a veces ni siquiera se ha cargado metadata (porque preload="none"). 
+        // Primero forzamos la pista correcta:
+        const initialSimulatedState = getSimulatedPlaybackState();
+        setTrackIndex(initialSimulatedState.trackIndex);
 
-        const track = MUSIC_TRACKS[simulatedState.trackIndex];
+        const track = MUSIC_TRACKS[initialSimulatedState.trackIndex];
         if (track) {
           const expectedSrc = `/musica/${encodeURIComponent(track.file)}`;
 
@@ -254,29 +272,32 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
             a.src = expectedSrc;
           }
 
-          // Tratamos de buscar la metadata para ajustar el cabezal de reproduccion antes de emitir sonido
-          if (a.readyState >= 1) { // 1 = HAVE_METADATA
-            if (a.duration && a.duration > simulatedState.progressTimeSeconds) {
-              a.currentTime = simulatedState.progressTimeSeconds;
+          if (a.readyState >= 1) { // Escritorio: usualmente ya tiene info
+            // Ojo: volvemos a calcular el estado JUSTO AQUÍ, en lugar del tomado al clickear
+            const freshState = getSimulatedPlaybackState();
+            if (a.duration && a.duration > freshState.progressTimeSeconds) {
+              a.currentTime = freshState.progressTimeSeconds;
             } else if (a.duration) {
-              a.currentTime = simulatedState.progressTimeSeconds % a.duration;
+              a.currentTime = freshState.progressTimeSeconds % a.duration;
             }
             setStatus("loading");
             safePlay(a);
           } else {
-            // Si el buffer no se ha cargado hay que esperar el loadedmetadata
+            // Móvil: va a tener que descargar un trocito de la pista por el internet para empezar
             const applySeek = () => {
-              if (a.duration && a.duration > simulatedState.progressTimeSeconds) {
-                a.currentTime = simulatedState.progressTimeSeconds;
+              // ESTO ES LO CRÍTICO: Recalculamos el tiempo AHORA QUE YA DESCARGÓ (pudo tardar 2 seg)
+              const lazyState = getSimulatedPlaybackState();
+              if (a.duration && a.duration > lazyState.progressTimeSeconds) {
+                a.currentTime = lazyState.progressTimeSeconds;
               } else if (a.duration) {
-                a.currentTime = simulatedState.progressTimeSeconds % a.duration;
+                a.currentTime = lazyState.progressTimeSeconds % a.duration;
               }
               setStatus("loading");
               safePlay(a);
               a.removeEventListener("loadedmetadata", applySeek);
             };
             a.addEventListener("loadedmetadata", applySeek);
-            a.load();
+            a.load(); // Forzamos carga
           }
         }
       }
@@ -298,8 +319,52 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
   }, []);
 
   // ─── Info del track constante (Live Radio Mode) ───────────────
-  const trackTitle = APP_CONFIG.RADIO_NAME;
-  const trackArtist = "TRANSMISIÓN EN VIVO";
+  const trackTitle = mode === "music" ? (MUSIC_TRACKS[trackIndex]?.title || APP_CONFIG.RADIO_NAME) : APP_CONFIG.RADIO_NAME;
+  const trackArtist = mode === "music" ? (MUSIC_TRACKS[trackIndex]?.artist || "Radio Sisid") : "TRANSMISIÓN EN VIVO";
+
+  // ─── Media Session API (Para Móvil/Escritorio) ─────────────
+  useEffect(() => {
+    if (!("mediaSession" in navigator)) return;
+
+    try {
+      // Configuramos Metadata
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: trackTitle,
+        artist: trackArtist,
+        album: APP_CONFIG.SLOGAN,
+        artwork: [
+          { src: APP_CONFIG.LOGO_URL || "/logoradio.jpg", sizes: "512x512", type: "image/jpeg" },
+          { src: APP_CONFIG.LOGO_URL || "/logoradio.jpg", sizes: "192x192", type: "image/jpeg" },
+        ],
+      });
+
+      // Estado de reproducción
+      navigator.mediaSession.playbackState = (status === "playing" || status === "loading") ? "playing" : "paused";
+
+      // Manejadores de control (Lock Screen / Notificaciones)
+      navigator.mediaSession.setActionHandler("play", () => toggle());
+      navigator.mediaSession.setActionHandler("pause", () => toggle());
+
+      // Si es radio en vivo, quitamos los botones de adelante/atrás para reforzar que es Live
+      if (mode === "live") {
+        navigator.mediaSession.setActionHandler("previoustrack", null);
+        navigator.mediaSession.setActionHandler("nexttrack", null);
+      } else {
+        // Podríamos mapear siguiente/anterior si quisiéramos en modo música
+        navigator.mediaSession.setActionHandler("previoustrack", null);
+        navigator.mediaSession.setActionHandler("nexttrack", null);
+      }
+    } catch (e) {
+      console.error("MediaSession error:", e);
+    }
+
+    return () => {
+      if ("mediaSession" in navigator) {
+        navigator.mediaSession.setActionHandler("play", null);
+        navigator.mediaSession.setActionHandler("pause", null);
+      }
+    };
+  }, [trackTitle, trackArtist, status, mode, toggle]);
 
   const state: AudioPlayerState = {
     status,

@@ -1,4 +1,5 @@
 import { APP_CONFIG } from "@/config";
+import { SECTION_IDS } from "@/constants/routes";
 import { motion } from "framer-motion";
 
 const IconApple = () => (
@@ -36,7 +37,7 @@ const IconBell = () => (
 export default function AppPromo() {
     return (
         <section
-            id="nuestra_app"
+            id={SECTION_IDS.NUESTRA_APP}
             aria-labelledby="app-promo-title"
             className="py-20 sm:py-28 relative overflow-hidden"
         >
@@ -112,7 +113,7 @@ export default function AppPromo() {
                     </div>
 
                     {/* Mockup del telefono */}
-                    <div className="flex-shrink-0 hidden sm:flex justify-center items-center relative">
+                    <div className="flex-shrink-0 flex justify-center items-center relative mt-10 lg:mt-0">
                         {/* Glow ambient */}
                         <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-75 pointer-events-none" aria-hidden="true" />
 

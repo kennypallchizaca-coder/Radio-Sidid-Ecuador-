@@ -1,4 +1,5 @@
 import { SOCIAL_CONFIG, getWhatsAppUrl } from "@/config";
+import { SECTION_IDS } from "@/constants/routes";
 import { motion } from "framer-motion";
 
 /* ── Íconos SVG compactos ──────────────────────────────────── */
@@ -58,7 +59,7 @@ const CARDS = [
 export default function Contact() {
   return (
     <section
-      id="contacto"
+      id={SECTION_IDS.CONTACTO}
       aria-labelledby="contact-title"
       className="py-20 sm:py-28 relative overflow-hidden font-mono"
     >
@@ -79,17 +80,17 @@ export default function Contact() {
 
           <h2
             id="contact-title"
-            className="text-4xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-blue-500 to-red-500 tracking-tight"
+            className="text-3xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-blue-500 to-red-500 tracking-tight"
           >
             Conéctate con<br />Nosotros
           </h2>
-          <p className="text-base sm:text-lg text-white/50 max-w-xl mx-auto font-medium">
+          <p className="text-sm sm:text-lg text-white/50 max-w-xl mx-auto font-medium px-4">
             Síguenos en nuestras redes sociales para no perderte ninguna novedad, eventos especiales y las mejores mezclas.
           </p>
         </motion.div>
 
-        {/* ── Contact Pills Minimalistas ────────────────────── */}
-        <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mt-10">
+        {/* Social Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto px-4">
           {CARDS.map((card, i) => (
             <motion.a
               key={card.name}
