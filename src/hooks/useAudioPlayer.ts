@@ -66,9 +66,15 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
   // ─── Elemento Audio ─────────────────────────────────────────
   const audio = useMemo(() => {
     const a = new Audio();
-    a.preload = "none";
-    a.crossOrigin = "anonymous";
-    // Propiedades vitales en móvil para evitar retrasos y pantallas completas (iOS)
+    // 'metadata' permite cargar info inicial rapido sin descargar todo el stream.
+    // Evita el retraso de "CONECTANDO..." eterno.
+    a.preload = "metadata";
+
+    // IMPORTANTE: Quitar crossOrigin="anonymous". 
+    // Los servidores de streaming de radio rara vez soportan CORS.
+    // Dejarlo activado causa que el stream se bloquee en producción.
+    // a.crossOrigin = "anonymous"; 
+
     a.setAttribute("playsinline", "true");
     return a;
   }, []);
@@ -268,6 +274,7 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
     } else {
       if (modeRef.current === "live") {
         a.src = APP_CONFIG.STREAM_URL;
+        a.load(); // Fuerza al navegador a abrir la nueva conexión
         setStatus("loading");
         safePlay(a);
       } else {

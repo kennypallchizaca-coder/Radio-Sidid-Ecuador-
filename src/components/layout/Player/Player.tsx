@@ -279,7 +279,11 @@ export default function Player({ playerState, controls }: PlayerProps) {
             ].join(" ")}
           >
             {isLoading ? (
-              <span className="loading loading-spinner text-white loading-sm drop-shadow-lg" />
+              <div className="flex items-center gap-1.5 h-full animate-pulse px-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-white/40" />
+                <span className="w-1.5 h-1.5 rounded-full bg-white/70" />
+                <span className="w-1.5 h-1.5 rounded-full bg-white/40" />
+              </div>
             ) : isPlaying ? (
               <PauseIcon className="w-6 h-6 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
             ) : (
