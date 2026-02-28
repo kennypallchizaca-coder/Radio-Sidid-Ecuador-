@@ -291,7 +291,7 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
     // Para modo "live" (streaming URL real) no podemos modificar el currentTime.
     if (mode !== "music" || status !== "playing") return;
 
-    const SYNC_INTERVAL_MS = 1000;      // Revisar cada segundo
+    const SYNC_INTERVAL_MS = 250;      // Revisar 4 veces por segundo (muy agresivo)
 
     const syncLoop = setInterval(() => {
       if (!a.duration) return; // Todavía no cargó del todo, ignorar
@@ -305,6 +305,7 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
         if (newTrack) {
           a.src = `/musica/${encodeURIComponent(newTrack.file)}`;
           a.currentTime = expectedState.progressTimeSeconds;
+          if (a.playbackRate !== 1.0) a.playbackRate = 1.0;
           safePlay(a);
           return;
         }
@@ -314,24 +315,13 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
       const expectedSeconds = expectedState.progressTimeSeconds;
       const currentDrift = Math.abs(a.currentTime - expectedSeconds);
 
-      // Tolerancia: 0.15s es una diferencia inaudible (eco mínimo)
-      const MAX_DRIFT_SECONDS = 0.15;
+      // CERO DELAY: Tolerancia microscópica (0.05s = 50 milisegundos)
+      const MAX_DRIFT_SECONDS = 0.05;
 
       if (currentDrift > MAX_DRIFT_SECONDS) {
-        if (currentDrift < 1.0) {
-          // Desfase pequeño (< 1s): Ajustar la velocidad ligeramente para alcanzar sin clics abruptos
-          if (a.currentTime < expectedSeconds) {
-            a.playbackRate = 1.05; // Lo adelantamos 5%
-          } else {
-            a.playbackRate = 0.95; // Lo frenamos 5%
-          }
-        } else {
-          // Desfase grande (> 1s por internet lento o pausas): Forzar salto instantáneo
-          a.playbackRate = 1.0;
-          a.currentTime = expectedSeconds;
-        }
-      } else {
-        // Sincronización perfecta: Velocidad normal 100%
+        // En lugar de ser sutiles, forzamos un salto brutal e instantáneo a la hora exacta
+        a.currentTime = expectedSeconds;
+        // Restauramos velocidad por si venía alterada
         if (a.playbackRate !== 1.0) a.playbackRate = 1.0;
       }
 
