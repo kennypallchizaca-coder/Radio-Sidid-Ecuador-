@@ -27,7 +27,7 @@ export const APP_CONFIG = {
   // ► REEMPLAZA esta URL con la dirección real de tu servidor
   //   de streaming (Icecast, Shoutcast, Azuracast, etc.)
   //   Formatos soportados: MP3 stream, AAC, HLS (.m3u8)
-  //STREAM_URL: "https://radio-sisid-ecuador.000webhostapp.com/stream",
+  STREAM_URL: "https://radio-sisid-ecuador.000webhostapp.com/stream",
 
   // ── SEO / Meta ───────────────────────────────────────────────
   META_DESCRIPTION: "Radio Sisid Ecuador — La voz del pueblo cañari. Desde Minneapolis, Minnesota hacia el mundo.",
