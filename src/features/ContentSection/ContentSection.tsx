@@ -19,7 +19,7 @@ export default function ContentSection() {
 
   return (
     <section aria-label="Audio y video" className="px-3 py-4 sm:px-5 sm:py-5">
-      <div className="mx-auto grid max-w-[1180px] grid-cols-2 grid-rows-[120px_220px] gap-3 sm:gap-4 md:grid-rows-[150px_320px]">
+      <div className="mx-auto grid max-w-[1180px] grid-cols-2 grid-rows-[125px_225px] gap-3 sm:grid-rows-[145px_260px] sm:gap-4 lg:grid-rows-[180px_360px]">
         <Panel>
           <div className="flex h-full flex-col rounded-lg border border-[#275be0]/70 bg-gradient-to-b from-[#081a57] to-[#030b28] px-2 py-1">
             <div className="flex items-center justify-between text-[8px] font-semibold uppercase tracking-[0.1em] text-white/80">
@@ -27,7 +27,7 @@ export default function ContentSection() {
               <span>Right</span>
             </div>
 
-            <div className="mt-0.5 h-[38px] overflow-hidden sm:h-[50px] md:h-[120px]">
+            <div className="mt-0.5 h-[40px] overflow-hidden sm:h-[52px] lg:h-[108px]">
               <div className="grid h-full grid-cols-[repeat(16,minmax(0,1fr))] items-end gap-[2px]">
                 {bars.map((height, index) => (
                   <span
@@ -49,27 +49,27 @@ export default function ContentSection() {
                   onClick={controls.toggle}
                   disabled={playerState.isLoading}
                   aria-label={playerState.isPlaying ? "Pausar radio" : "Reproducir radio"}
-                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#ff9629]/80 bg-gradient-to-br from-[#f3932c] to-[#cd5710] text-white transition hover:brightness-110 disabled:opacity-60 sm:h-[24px] sm:w-[24px] md:h-[28px] md:w-[28px]"
+                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#ff9629]/80 bg-gradient-to-br from-[#f3932c] to-[#cd5710] text-white transition hover:brightness-110 disabled:opacity-60 sm:h-[24px] sm:w-[24px] lg:h-[30px] lg:w-[30px]"
                 >
                   {playerState.isLoading ? (
                     <span className="h-2 w-2 animate-spin rounded-full border border-white border-t-transparent" />
                   ) : playerState.isPlaying ? (
-                    <PauseIcon className="h-[9px] w-[9px] sm:h-[10px] sm:w-[10px]" />
+                    <PauseIcon className="h-[9px] w-[9px] sm:h-[10px] sm:w-[10px] lg:h-[12px] lg:w-[12px]" />
                   ) : (
-                    <PlayIcon className="h-[9px] w-[9px] translate-x-[1px] sm:h-[10px] sm:w-[10px]" />
+                    <PlayIcon className="h-[9px] w-[9px] translate-x-[1px] sm:h-[10px] sm:w-[10px] lg:h-[12px] lg:w-[12px]" />
                   )}
                 </button>
 
                 <div className="min-w-0 flex-1 text-center">
-                  <p className="truncate font-display text-[11px] leading-none text-white sm:text-xs md:text-base">{APP_CONFIG.RADIO_NAME}</p>
-                  <p className="text-[6px] font-semibold uppercase tracking-[0.09em] text-yellow-300/90 sm:text-[7px]">
+                  <p className="truncate font-display text-[11px] leading-none text-white sm:text-xs lg:text-base">{APP_CONFIG.RADIO_NAME}</p>
+                  <p className="text-[6px] font-semibold uppercase tracking-[0.09em] text-yellow-300/90 sm:text-[7px] lg:text-[9px]">
                     {playerState.isPlaying ? "En vivo" : "Presiona play"}
                   </p>
                 </div>
 
-                <span className="shrink-0 text-[6px] font-semibold uppercase tracking-[0.09em] text-white/50 sm:text-[7px]">00:00</span>
+                <span className="shrink-0 text-[6px] font-semibold uppercase tracking-[0.09em] text-white/50 sm:text-[7px] lg:text-[9px]">00:00</span>
                 <div className="flex shrink-0 items-center gap-1">
-                  <ValueIcon className="h-3 w-3 text-white/70 sm:h-4 sm:w-4 md:h-5 md:w-5" />
+                  <ValueIcon className="h-3 w-3 text-white/70 sm:h-4 sm:w-4 lg:h-5 lg:w-5" />
                   <div className="flex items-center">
                     <input
                       type="range"
@@ -79,7 +79,7 @@ export default function ContentSection() {
                       value={playerState.volume}
                       onChange={(e) => controls.setVolume(+e.target.value)}
                       aria-label="Volumen"
-                      className="radio-volume-slider w-[44px] sm:w-[72px] md:w-[120px]"
+                      className="radio-volume-slider w-[44px] sm:w-[72px] lg:w-[120px]"
                     />
                   </div>
                 </div>
@@ -94,8 +94,8 @@ export default function ContentSection() {
               <img src="/img/image3.png" alt="Promocion de radio" className="h-full w-full object-cover" loading="lazy" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#04091fd6] via-transparent to-transparent" />
               <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3">
-                <p className="font-display text-xl leading-none text-white sm:text-2xl md:text-4xl">Siempre Contigo</p>
-                <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-yellow-300 sm:text-[10px] md:text-xs">Radio en vivo</p>
+                <p className="font-display text-xl leading-none text-white sm:text-2xl lg:text-4xl">Siempre Contigo</p>
+                <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-yellow-300 sm:text-[10px] lg:text-xs">Radio en vivo</p>
               </div>
             </div>
           </Panel>
