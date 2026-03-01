@@ -10,6 +10,9 @@ const navItems = [
   { id: "iphone", label: "IPHONE", href: APP_CONFIG.IPHONE_APP_URL, internal: false },
 ] as const;
 
+const NAV_BTN = "radio-nav-button radio-nav-sm";
+const NAV_BTN_DISABLED = `${NAV_BTN} opacity-70`;
+
 export default function Header() {
   const [isHidden, setIsHidden] = useState(false);
   const lastScroll = useRef(0);
@@ -47,7 +50,7 @@ export default function Header() {
                   e.preventDefault();
                   scrollToSection(SECTION_IDS.INICIO);
                 }}
-                className="radio-nav-button !min-h-[2.2rem] !rounded-md !border-[#2c68d9] !bg-gradient-to-r !from-[#0a2f86] !to-[#144fb3] !px-1 !text-[10px] !leading-none sm:!min-h-[2.65rem] sm:!px-2 sm:!text-sm"
+                className={NAV_BTN}
               >
                 {item.label}
               </a>
@@ -57,7 +60,7 @@ export default function Header() {
                 href={item.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="radio-nav-button !min-h-[2.2rem] !rounded-md !border-[#2c68d9] !bg-gradient-to-r !from-[#0a2f86] !to-[#144fb3] !px-1 !text-[10px] !leading-none sm:!min-h-[2.65rem] sm:!px-2 sm:!text-sm"
+                className={NAV_BTN}
               >
                 {item.label}
               </a>
@@ -65,7 +68,7 @@ export default function Header() {
               <button
                 key={item.id}
                 type="button"
-                className="radio-nav-button !min-h-[2.2rem] !rounded-md !border-[#2c68d9] !bg-gradient-to-r !from-[#0a2f86] !to-[#144fb3] !px-1 !text-[10px] !leading-none opacity-70 sm:!min-h-[2.65rem] sm:!px-2 sm:!text-sm"
+                className={NAV_BTN_DISABLED}
                 disabled
               >
                 {item.label}

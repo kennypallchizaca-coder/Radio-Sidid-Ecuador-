@@ -18,7 +18,7 @@ export default function Hero() {
               <img
                 src={bannerSrc}
                 alt={`Banner principal ${APP_CONFIG.RADIO_NAME}`}
-                className="h-[200px] w-full object-cover object-center sm:h-[270px] md:h-[320px]"
+                className="h-auto w-full object-contain object-center sm:h-[270px] sm:object-cover md:h-[320px]"
                 loading="eager"
               />
             </div>

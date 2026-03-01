@@ -19,7 +19,7 @@ export default function ContentSection() {
 
   return (
     <section aria-label="Audio y video" className="px-3 py-4 sm:px-5 sm:py-5">
-      <div className="mx-auto grid max-w-[1180px] grid-cols-1 grid-rows-[repeat(3,220px)] gap-3 sm:grid-cols-2 sm:grid-rows-[200px_280px] sm:gap-4 lg:grid-rows-[240px_400px]">
+      <div className="mx-auto grid max-w-[1180px] grid-cols-1 auto-rows-auto gap-3 sm:grid-cols-2 sm:grid-rows-[200px_280px] sm:gap-4 lg:grid-rows-[240px_400px]">
         {/* ── Player Panel ── */}
         <Panel>
           <div className="relative flex h-full flex-col overflow-hidden rounded-lg border border-[#1e3fa8]/60 bg-gradient-to-b from-[#0a1d5e] via-[#060f38] to-[#020820]">
@@ -121,15 +121,15 @@ export default function ContentSection() {
 
         <div className="sm:row-span-2">
           <Panel>
-            <div className="relative aspect-[16/10] h-full overflow-hidden rounded-lg border border-white/10 md:aspect-auto">
-              <img src={image3Src} alt="Promocion de radio" className="h-full w-full object-cover" loading="lazy" />
+            <div className="relative overflow-hidden rounded-lg border border-white/10 sm:h-full">
+              <img src={image3Src} alt="Promocion de radio" className="w-full object-contain sm:h-full sm:object-cover" loading="lazy" />
             </div>
           </Panel>
         </div>
 
         <Panel className="!p-1.5">
           {APP_CONFIG.VIDEO_EMBED_URL ? (
-            <div className="relative aspect-[16/10] h-full w-full overflow-hidden rounded-lg border border-white/10 bg-black md:aspect-auto">
+            <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-white/10 bg-black sm:aspect-auto sm:h-full">
               <iframe
                 src={APP_CONFIG.VIDEO_EMBED_URL}
                 title="Video en vivo"

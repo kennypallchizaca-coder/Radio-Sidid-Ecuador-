@@ -24,15 +24,22 @@ export const APP_CONFIG = {
   BANNER_IMAGE_URL: "",
 
   // ── Stream de audio ─────────────────────────────────────────
-  // ► REEMPLAZA esta URL con la dirección real de tu servidor
-  //   de streaming (Icecast, Shoutcast, Azuracast, etc.)
-  //   Formatos soportados: MP3 stream, AAC, HLS (.m3u8)
-  STREAM_URL: "https://radio-sisid-ecuador.000webhostapp.com/stream",
+  // ► Fallback si la API pública no encuentra estaciones.
+  //   Se usa Radio Browser API (código abierto, GPL, uso libre).
+  STREAM_URL: "",
 
   // ── Opciones de API pública de radio ────────────────────────
-  // activar para intentar resolver stream a través de Radio Browser API
+  // Radio Browser API: proyecto open-source (GPL), API pública gratuita.
+  // Las estaciones se registran voluntariamente en el directorio.
+  // https://www.radio-browser.info — Uso libre, sin restricciones legales.
   USE_PUBLIC_RADIO_API: true,
   RADIO_API_BASE_URL: "https://de1.api.radio-browser.info/json",
+  // Servidores de respaldo (failover automático)
+  RADIO_API_FALLBACK_URLS: [
+    "https://de2.api.radio-browser.info/json",
+    "https://nl1.api.radio-browser.info/json",
+    "https://at1.api.radio-browser.info/json",
+  ] as const,
   RADIO_API_COUNTRY_CODE: "EC",
   RADIO_API_PREFERRED_STATIONS: [] as const,
   // Solo tomará emisoras que coincidan con al menos 1 palabra clave.
@@ -42,6 +49,15 @@ export const APP_CONFIG = {
     "canari",
     "cañari",
     "cumbia",
+    "sisid",
+    "ecuatoriana",
+    "folklorica",
+    "andina",
+    "sanjuanito",
+    "pasillo",
+    "bomba",
+    "kichwa",
+    "quechua",
   ] as const,
   // Opcional: palabras a excluir (ejemplo: "rock", "cumbia").
   RADIO_API_EXCLUDED_KEYWORDS: [] as const,

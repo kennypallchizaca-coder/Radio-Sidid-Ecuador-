@@ -3,10 +3,13 @@ import { SECTION_IDS } from "@/constants/routes";
 import imagen2Src from "@/assets/img/imagen2.png";
 import bienvenidosSrc from "@/assets/img/bienvenidos.png";
 import iglesiaSrc from "@/assets/img/iglesia.jpg";
+import iglesia2Src from "@/assets/img/iglesia2.png";
 
 const SECOND_CARD_IMAGES = [
   { src: bienvenidosSrc, alt: "Imagen promocional 3" },
   { src: iglesiaSrc, alt: "Imagen promocional 4" },
+  { src: iglesia2Src, alt: "Imagen promocional 5" },
+
 ];
 
 export default function Gallery() {
@@ -27,19 +30,19 @@ export default function Gallery() {
             <img
               src={imagen2Src}
               alt="Imagen promocional 1"
-              className="aspect-[4/3] w-full rounded-md object-cover object-center sm:aspect-auto sm:h-[520px] lg:h-[520px]"
+              className="w-full rounded-md object-contain object-center sm:h-[520px] sm:object-cover lg:h-[520px]"
               loading="lazy"
             />
           </article>
 
           <article className="overflow-hidden rounded-xl border border-[#123da8]/75 bg-[#020718] p-2.5 shadow-[0_12px_35px_rgba(0,0,0,0.35)]">
-            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-md sm:aspect-auto sm:h-[520px] lg:h-[520px]">
+            <div className="relative w-full overflow-hidden rounded-md min-h-[250px] sm:h-[520px] lg:h-[520px]">
               {SECOND_CARD_IMAGES.map((image, index) => (
                 <img
                   key={image.src}
                   src={image.src}
                   alt={image.alt}
-                  className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-500 ${
+                  className={`absolute inset-0 h-full w-full object-contain object-center transition-opacity duration-500 sm:object-cover ${
                     index === secondIndex ? "opacity-100" : "opacity-0"
                   }`}
                   loading="lazy"

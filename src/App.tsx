@@ -11,7 +11,7 @@ function AppShell() {
     <div className="min-h-screen bg-radio-page text-white antialiased">
       <div className="relative flex min-h-screen flex-col">
         <Header />
-        <main id="main-content" className="flex-grow" role="main">
+        <main id="main-content" className="flex-grow">
           <HomePage />
         </main>
       </div>

@@ -109,7 +109,18 @@ export async function resolveEcuadorRadioStream(
   });
 
   const endpoint = `${base}/stations/bycountrycodeexact/${encodeURIComponent(countryCode)}?${params.toString()}`;
-  const response = await fetch(endpoint);
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8_000);
+
+  let response: Response;
+  try {
+    response = await fetch(endpoint, { signal: controller.signal });
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
   if (!response.ok) return null;
 
   const data = (await response.json()) as RadioBrowserStation[];
@@ -123,10 +134,15 @@ export async function resolveEcuadorRadioStream(
   );
   const pool = withoutExcluded.length > 0 ? withoutExcluded : playable;
 
+  const genreKeywords = options.genreKeywords ?? [];
+  if (genreKeywords.length === 0) return null;
+
   const byGenre = pool.filter((station) =>
-    hasAnyKeyword(stationSearchText(station), options.genreKeywords ?? []),
+    hasAnyKeyword(stationSearchText(station), genreKeywords),
   );
-  const genrePool = byGenre.length > 0 ? byGenre : pool;
+  // Forzar: solo estaciones que coincidan con keywords. Sin fallback.
+  if (byGenre.length === 0) return null;
+  const genrePool = byGenre;
 
   const preferred = selectPreferredStation(genrePool, options.preferredStations ?? []);
   const picked = preferred ?? genrePool[0];

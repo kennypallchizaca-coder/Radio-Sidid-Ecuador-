@@ -49,22 +49,30 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
     if (resolvingStreamRef.current) return resolvingStreamRef.current;
 
     const pending = (async () => {
-      try {
-        const resolved = await resolveEcuadorRadioStream({
-          baseUrl: APP_CONFIG.RADIO_API_BASE_URL,
-          countryCode: APP_CONFIG.RADIO_API_COUNTRY_CODE,
-          preferredStations: APP_CONFIG.RADIO_API_PREFERRED_STATIONS,
-          genreKeywords: APP_CONFIG.RADIO_API_GENRE_KEYWORDS,
-          excludedKeywords: APP_CONFIG.RADIO_API_EXCLUDED_KEYWORDS,
-          limit: 60,
-        });
+      // Intentar servidor principal + fallbacks
+      const servers = [
+        APP_CONFIG.RADIO_API_BASE_URL,
+        ...APP_CONFIG.RADIO_API_FALLBACK_URLS,
+      ];
 
-        if (resolved) {
-          streamUrlRef.current = resolved.streamUrl;
-          return resolved.streamUrl;
+      for (const baseUrl of servers) {
+        try {
+          const resolved = await resolveEcuadorRadioStream({
+            baseUrl,
+            countryCode: APP_CONFIG.RADIO_API_COUNTRY_CODE,
+            preferredStations: APP_CONFIG.RADIO_API_PREFERRED_STATIONS,
+            genreKeywords: APP_CONFIG.RADIO_API_GENRE_KEYWORDS,
+            excludedKeywords: APP_CONFIG.RADIO_API_EXCLUDED_KEYWORDS,
+            limit: 60,
+          });
+
+          if (resolved) {
+            streamUrlRef.current = resolved.streamUrl;
+            return resolved.streamUrl;
+          }
+        } catch {
+          // intentar siguiente servidor
         }
-      } catch {
-        // fallback silencioso
       }
 
       streamUrlRef.current = APP_CONFIG.STREAM_URL;
