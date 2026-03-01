@@ -17,9 +17,9 @@ export default function Gallery() {
   }, []);
 
   return (
-    <section id={SECTION_IDS.GALERIA} aria-label="Galeria" className="px-3 py-4 sm:px-5 sm:py-5 min-h-[400px] sm:min-h-[560px] lg:min-h-[540px]">
+    <section id={SECTION_IDS.GALERIA} aria-label="Galeria" className="px-3 py-4 sm:px-5 sm:py-5 min-h-[300px] sm:min-h-[560px] lg:min-h-[540px]">
       <div className="mx-auto max-w-[1180px]">
-        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
           <article className="overflow-hidden rounded-xl border border-[#123da8]/75 bg-[#020718] p-2.5 shadow-[0_12px_35px_rgba(0,0,0,0.35)]">
             <img
               src="/img/imagen2.png"

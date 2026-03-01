@@ -37,7 +37,7 @@ export default function Header() {
           {APP_CONFIG.RADIO_NAME}
         </p>
 
-        <nav aria-label="Principal" className="grid grid-cols-4 gap-2">
+        <nav aria-label="Principal" className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {navItems.map((item) =>
             item.internal ? (
               <a

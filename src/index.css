@@ -120,27 +120,34 @@
 }
 
 @keyframes equalizer {
-
   0%,
   100% {
-    height: 8px;
-    background: linear-gradient(180deg, red, orange, yellow);
+    height: 12%;
   }
 
   25% {
-    height: 50px;
-    background: linear-gradient(180deg, orange, yellow, green);
+    height: 65%;
   }
 
   50% {
-    height: 100px;
-    background: linear-gradient(180deg, yellow, green, blue);
+    height: 90%;
   }
 
   75% {
-    height: 50px;
-    background: linear-gradient(180deg, green, blue, purple);
+    height: 40%;
   }
+}
+
+.player-bar-active {
+  background: linear-gradient(
+    to top,
+    #f3932c 0%,
+    #f5a623 30%,
+    #ffd43b 55%,
+    #48e06a 80%,
+    #22c55e 100%
+  );
+  box-shadow: 0 0 6px rgba(243, 147, 44, 0.3);
 }
 
 ::-webkit-scrollbar {

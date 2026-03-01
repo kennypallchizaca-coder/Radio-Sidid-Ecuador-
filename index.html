@@ -4,47 +4,62 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Radio Sisid" />
 
   <!-- ── Favicon ──────────────────────────────────────────── -->
   <link rel="icon" type="image/svg+xml" href="/logoradio_embedded.svg" />
+  <link rel="icon" type="image/jpeg" sizes="192x192" href="/logoradio.jpg" />
   <link rel="apple-touch-icon" href="/logoradio.jpg" />
 
   <!-- ── SEO Meta Tags ────────────────────────────────────── -->
   <title>Radio Sisid Ecuador — Música en Vivo las 24 Horas | La Voz del Pueblo Cañari</title>
   <meta name="description"
-    content="Radio Sisid Ecuador — La voz del pueblo cañari. Desde Minneapolis, Minnesota hacia el mundo. Música intercultural, noticias y cultura las 24 horas." />
+    content="Escucha Radio Sisid Ecuador en vivo — La voz del pueblo cañari. Desde Minneapolis, Minnesota hacia el mundo. Música intercultural, noticias, cultura y entretenimiento las 24 horas. Disponible en Android y web." />
   <meta name="keywords"
-    content="radio, ecuador, cañari, en vivo, streaming, música intercultural, radio online, minneapolis, minnesota, radios de ecuador, radio cañari en vivo, emisoras ecuatorianas, música ecuatoriana, radio latina minnesota" />
+    content="radio sisid, radio sisid ecuador, radio cañari, radio cañari en vivo, emisoras ecuatorianas, música ecuatoriana, radio latina minnesota, radio online ecuador, streaming en vivo, música intercultural, cumbia ecuatoriana, chicha ecuatoriana, radio latina usa, radios de ecuador en vivo" />
   <meta name="author" content="Radio Sisid Ecuador" />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="googlebot" content="index, follow" />
   <link rel="canonical" href="https://radio-sidid-ecuador.vercel.app/" />
   <link rel="alternate" hreflang="es" href="https://radio-sidid-ecuador.vercel.app/" />
   <link rel="alternate" hreflang="es-EC" href="https://radio-sidid-ecuador.vercel.app/" />
-  <meta name="theme-color" content="#e74c3c" />
+  <link rel="alternate" hreflang="x-default" href="https://radio-sidid-ecuador.vercel.app/" />
+  <meta name="theme-color" content="#060810" />
+  <meta name="theme-color" content="#060810" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#0a1d5e" media="(prefers-color-scheme: light)" />
 
-  <!-- ── Open Graph / Facebook ────────────────────────────── -->
+  <!-- ── Geo / Local SEO ──────────────────────────────────── -->
+  <meta name="geo.region" content="US-MN" />
+  <meta name="geo.placename" content="Minneapolis, Minnesota" />
+  <meta name="geo.position" content="44.9778;-93.2650" />
+  <meta name="ICBM" content="44.9778, -93.2650" />
+
+  <!-- ── Open Graph / Facebook / WhatsApp ─────────────────── -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://radio-sidid-ecuador.vercel.app/" />
   <meta property="og:title" content="Radio Sisid Ecuador — Música en Vivo las 24 Horas" />
   <meta property="og:description"
-    content="Escúchanos en vivo — La voz del pueblo cañari. Desde Minneapolis, Minnesota hacia el mundo." />
+    content="Escúchanos en vivo — La voz del pueblo cañari. Desde Minneapolis, Minnesota hacia el mundo. Música, noticias y cultura 24/7." />
   <meta property="og:image" content="https://radio-sidid-ecuador.vercel.app/img/seo-banner.png" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="Radio Sisid Ecuador - La Voz del Pueblo Cañari" />
-  <meta property="og:locale" content="es_EC" />
-  <meta property="og:site_name" content="Radio Sisid Ecuador" />
-
-  <!-- WhatsApp usa las mismas meta OG de arriba; no duplicar -->
   <meta property="og:image:secure_url" content="https://radio-sidid-ecuador.vercel.app/img/seo-banner.png" />
   <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Radio Sisid Ecuador — La Voz del Pueblo Cañari. Escúchanos en vivo las 24 horas." />
+  <meta property="og:locale" content="es_EC" />
+  <meta property="og:locale:alternate" content="es_US" />
+  <meta property="og:site_name" content="Radio Sisid Ecuador" />
 
-  <!-- ── Twitter Card ─────────────────────────────────────── -->
+  <!-- ── Twitter / X Card ─────────────────────────────────── -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Radio Sisid Ecuador — Música en Vivo las 24 Horas" />
+  <meta name="twitter:title" content="Radio Sisid Ecuador — Música en Vivo 24h" />
   <meta name="twitter:description"
     content="Escúchanos en vivo — La voz del pueblo cañari. Desde Minneapolis, Minnesota hacia el mundo." />
   <meta name="twitter:image" content="https://radio-sidid-ecuador.vercel.app/img/seo-banner.png" />
+  <meta name="twitter:image:alt" content="Radio Sisid Ecuador — La Voz del Pueblo Cañari" />
 
   <!-- ── JSON-LD Structured Data ──────────────────────────── -->
   <script type="application/ld+json">
@@ -55,25 +70,34 @@
           "@type": "Organization",
           "@id": "https://radio-sidid-ecuador.vercel.app/#organization",
           "name": "Radio Sisid Ecuador",
-          "alternateName": "Radio Sisid",
+          "alternateName": ["Radio Sisid", "Radio Sisid EC"],
           "url": "https://radio-sidid-ecuador.vercel.app",
-          "logo": "https://radio-sidid-ecuador.vercel.app/logoradio.jpg",
-          "description": "La voz del pueblo cañari. Desde Minneapolis, Minnesota hacia el mundo.",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://radio-sidid-ecuador.vercel.app/logoradio.jpg",
+            "width": 512,
+            "height": 512
+          },
+          "image": "https://radio-sidid-ecuador.vercel.app/img/seo-banner.png",
+          "description": "La voz del pueblo cañari. Desde Minneapolis, Minnesota hacia el mundo. Música intercultural, noticias y cultura las 24 horas.",
           "address": {
             "@type": "PostalAddress",
             "addressLocality": "Minneapolis",
-            "addressRegion": "Minnesota",
+            "addressRegion": "MN",
             "addressCountry": "US"
           },
           "sameAs": [
-            "https://facebook.com/radiosisidecuador",
-            "https://instagram.com/radiosisidecuador"
+            "https://www.facebook.com/profile.php?id=100067331525448",
+            "https://www.instagram.com/radiosisidecuador/",
+            "https://www.youtube.com/@liberatoGuaman-td3wv",
+            "https://play.google.com/store/apps/details?id=com.radiosisidecuador.host"
           ],
           "contactPoint": {
             "@type": "ContactPoint",
             "contactType": "customer service",
+            "telephone": "+1-612-462-5233",
             "email": "liberatoguaman5815@gmail.com",
-            "availableLanguage": "Spanish"
+            "availableLanguage": ["Spanish", "Kichwa"]
           }
         },
         {
@@ -81,18 +105,63 @@
           "@id": "https://radio-sidid-ecuador.vercel.app/#website",
           "url": "https://radio-sidid-ecuador.vercel.app",
           "name": "Radio Sisid Ecuador",
+          "description": "Radio en vivo las 24 horas — La voz del pueblo cañari desde Minneapolis, Minnesota.",
           "publisher": { "@id": "https://radio-sidid-ecuador.vercel.app/#organization" },
-          "inLanguage": "es"
+          "inLanguage": "es",
+          "potentialAction": {
+            "@type": "ListenAction",
+            "target": "https://radio-sidid-ecuador.vercel.app/",
+            "name": "Escuchar Radio Sisid Ecuador en vivo"
+          }
         },
         {
           "@type": "RadioStation",
+          "@id": "https://radio-sidid-ecuador.vercel.app/#radiostation",
           "name": "Radio Sisid Ecuador",
+          "alternateName": "Radio Sisid",
           "url": "https://radio-sidid-ecuador.vercel.app",
           "broadcastDisplayName": "Radio Sisid Ecuador",
-          "broadcastTimezone": "America/Guayaquil",
-          "areaServed": {
-            "@type": "Country",
-            "name": "Ecuador"
+          "broadcastTimezone": "America/Chicago",
+          "broadcastFrequency": "Internet",
+          "logo": "https://radio-sidid-ecuador.vercel.app/logoradio.jpg",
+          "image": "https://radio-sidid-ecuador.vercel.app/img/seo-banner.png",
+          "slogan": "La voz del pueblo cañari",
+          "parentOrganization": { "@id": "https://radio-sidid-ecuador.vercel.app/#organization" },
+          "areaServed": [
+            { "@type": "Country", "name": "Ecuador" },
+            { "@type": "Country", "name": "United States" }
+          ],
+          "inLanguage": ["es", "qu"],
+          "genre": ["Chicha", "Cumbia", "Música Intercultural", "Kichwa", "Cañari"],
+          "sameAs": [
+            "https://www.facebook.com/profile.php?id=100067331525448",
+            "https://www.youtube.com/@liberatoGuaman-td3wv"
+          ]
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://radio-sidid-ecuador.vercel.app/#webpage",
+          "url": "https://radio-sidid-ecuador.vercel.app/",
+          "name": "Radio Sisid Ecuador — Música en Vivo las 24 Horas",
+          "isPartOf": { "@id": "https://radio-sidid-ecuador.vercel.app/#website" },
+          "about": { "@id": "https://radio-sidid-ecuador.vercel.app/#radiostation" },
+          "description": "Escucha Radio Sisid Ecuador en vivo. Música intercultural, noticias y cultura del pueblo cañari las 24 horas.",
+          "inLanguage": "es",
+          "primaryImageOfPage": {
+            "@type": "ImageObject",
+            "url": "https://radio-sidid-ecuador.vercel.app/img/seo-banner.png"
+          }
+        },
+        {
+          "@type": "MobileApplication",
+          "name": "Radio Sisid Ecuador",
+          "operatingSystem": "Android",
+          "applicationCategory": "MultimediaApplication",
+          "installUrl": "https://play.google.com/store/apps/details?id=com.radiosisidecuador.host",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
           }
         }
       ]
@@ -102,7 +171,8 @@
   <!-- ── Preconnect / Prefetch ────────────────────────────── -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="dns-prefetch" href="https://images.unsplash.com" />
+  <link rel="dns-prefetch" href="https://de1.api.radio-browser.info" />
+  <link rel="dns-prefetch" href="https://www.youtube.com" />
 </head>
 
 <body>

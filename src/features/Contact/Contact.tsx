@@ -60,8 +60,8 @@ export default function Contact() {
               <div className="absolute -left-10 -top-16 h-52 w-72 rounded-full bg-[#ff9100]/45" />
               <div className="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-[#7438ff]/50 to-transparent" />
 
-              <div className="relative grid items-center gap-3 lg:grid-cols-[178px_1fr]">
-                <div className="mx-auto flex h-[164px] w-[164px] items-center justify-center rounded-[18px] border border-white/35 bg-gradient-to-b from-[#f8be2d] to-[#d67809] shadow-[0_10px_25px_rgba(0,0,0,0.35)]">
+              <div className="relative grid items-center gap-3 sm:grid-cols-[178px_1fr] lg:grid-cols-[178px_1fr]">
+                <div className="mx-auto flex h-[120px] w-[120px] items-center justify-center rounded-[18px] border border-white/35 bg-gradient-to-b from-[#f8be2d] to-[#d67809] shadow-[0_10px_25px_rgba(0,0,0,0.35)] sm:h-[164px] sm:w-[164px]">
                   <span className="text-center text-3xl font-black uppercase leading-[0.86] text-[#1a1a1a] [text-shadow:0_2px_0_rgba(255,255,255,0.28)]">
                     Buena
                     <br />
@@ -70,10 +70,10 @@ export default function Contact() {
                 </div>
 
                 <div>
-                  <p className="text-center text-3xl font-black uppercase leading-[0.88] text-black sm:text-4xl lg:text-left xl:text-5xl">
+                  <p className="text-center text-2xl font-black uppercase leading-[0.88] text-black sm:text-4xl lg:text-left xl:text-5xl">
                     Escuchanos en tu telefono
                   </p>
-                  <p className="mt-1 text-center text-2xl font-bold uppercase leading-[0.9] text-white sm:text-3xl lg:text-left xl:text-4xl">
+                  <p className="mt-1 text-center text-xl font-bold uppercase leading-[0.9] text-white sm:text-3xl lg:text-left xl:text-4xl">
                     Descarga es gratis y escuchanos
                   </p>
 
@@ -102,7 +102,7 @@ export default function Contact() {
               href={SOCIAL_CONFIG.FACEBOOK_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn btn-primary h-[78px] min-h-[78px] w-[270px] rounded-lg border border-white/20 bg-gradient-to-r from-[#355fb5] to-[#2f57aa] text-4xl font-bold text-white hover:brightness-110 flex items-center justify-center gap-2"
+              className="btn btn-primary h-[60px] min-h-[60px] w-full rounded-lg border border-white/20 bg-gradient-to-r from-[#355fb5] to-[#2f57aa] text-3xl font-bold text-white hover:brightness-110 flex items-center justify-center gap-2 sm:h-[78px] sm:min-h-[78px] sm:w-[270px] sm:text-4xl"
               aria-label="Facebook"
             >
               Facebook
