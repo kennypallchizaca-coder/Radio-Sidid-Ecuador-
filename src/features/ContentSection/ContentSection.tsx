@@ -19,7 +19,7 @@ export default function ContentSection() {
 
   return (
     <section aria-label="Audio y video" className="px-3 py-4 sm:px-5 sm:py-5">
-      <div className="mx-auto grid max-w-[1180px] grid-cols-2 grid-rows-[125px_225px] gap-3 sm:grid-rows-[145px_260px] sm:gap-4 lg:grid-rows-[180px_360px]">
+      <div className="mx-auto grid max-w-[1180px] grid-cols-2 grid-rows-[130px_240px] gap-3 sm:grid-rows-[155px_280px] sm:gap-4 lg:grid-rows-[200px_400px]">
         <Panel>
           <div className="flex h-full flex-col rounded-lg border border-[#275be0]/70 bg-gradient-to-b from-[#081a57] to-[#030b28] px-2 py-1">
             <div className="flex items-center justify-between text-[8px] font-semibold uppercase tracking-[0.1em] text-white/80">
