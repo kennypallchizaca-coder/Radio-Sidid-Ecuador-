@@ -20,9 +20,12 @@
     @apply antialiased text-white;
     background-color: var(--radio-bg);
     background-image:
-      radial-gradient(circle at 10% 10%, rgba(255, 212, 59, 0.1), transparent 25%),
-      radial-gradient(circle at 85% 0%, rgba(18, 49, 160, 0.35), transparent 38%),
-      linear-gradient(180deg, #05060e 0%, #090d21 55%, #04050b 100%);
+      linear-gradient(180deg, rgba(5, 6, 14, 0.30) 0%, rgba(9, 13, 33, 0.25) 55%, rgba(4, 5, 11, 0.35) 100%),
+      url('./assets/img/fondoweb.jpeg');
+    background-size: cover, 100% 100%;
+    background-position: center center, center center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
     scroll-behavior: smooth;
     font-family: "Rajdhani", "Segoe UI", Tahoma, sans-serif;
     -webkit-font-smoothing: antialiased;

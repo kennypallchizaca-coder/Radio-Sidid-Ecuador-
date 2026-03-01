@@ -8,7 +8,7 @@ import HomePage from "@/pages/Home/HomePage";
 
 function AppShell() {
   return (
-    <div className="min-h-screen bg-radio-page text-white antialiased">
+    <div className="min-h-screen text-white antialiased">
       <div className="relative flex min-h-screen flex-col">
         <Header />
         <main id="main-content" className="flex-grow">
