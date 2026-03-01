@@ -37,7 +37,7 @@ export default function Header() {
           {APP_CONFIG.RADIO_NAME}
         </p>
 
-        <nav aria-label="Principal" className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+        <nav aria-label="Principal" className="grid grid-cols-4 gap-2">
           {navItems.map((item) =>
             item.internal ? (
               <a
@@ -47,7 +47,7 @@ export default function Header() {
                   e.preventDefault();
                   scrollToSection(SECTION_IDS.INICIO);
                 }}
-                className="radio-nav-button !min-h-[2.65rem] !rounded-md !border-[#2c68d9] !bg-gradient-to-r !from-[#0a2f86] !to-[#144fb3] !px-2 !text-xs !leading-none sm:!text-sm"
+                className="radio-nav-button !min-h-[2.2rem] !rounded-md !border-[#2c68d9] !bg-gradient-to-r !from-[#0a2f86] !to-[#144fb3] !px-1 !text-[10px] !leading-none sm:!min-h-[2.65rem] sm:!px-2 sm:!text-sm"
               >
                 {item.label}
               </a>
@@ -57,7 +57,7 @@ export default function Header() {
                 href={item.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="radio-nav-button !min-h-[2.65rem] !rounded-md !border-[#2c68d9] !bg-gradient-to-r !from-[#0a2f86] !to-[#144fb3] !px-2 !text-xs !leading-none sm:!text-sm"
+                className="radio-nav-button !min-h-[2.2rem] !rounded-md !border-[#2c68d9] !bg-gradient-to-r !from-[#0a2f86] !to-[#144fb3] !px-1 !text-[10px] !leading-none sm:!min-h-[2.65rem] sm:!px-2 sm:!text-sm"
               >
                 {item.label}
               </a>
@@ -65,7 +65,7 @@ export default function Header() {
               <button
                 key={item.id}
                 type="button"
-                className="radio-nav-button !min-h-[2.65rem] !rounded-md !border-[#2c68d9] !bg-gradient-to-r !from-[#0a2f86] !to-[#144fb3] !px-2 !text-xs !leading-none opacity-70 sm:!text-sm"
+                className="radio-nav-button !min-h-[2.2rem] !rounded-md !border-[#2c68d9] !bg-gradient-to-r !from-[#0a2f86] !to-[#144fb3] !px-1 !text-[10px] !leading-none opacity-70 sm:!min-h-[2.65rem] sm:!px-2 sm:!text-sm"
                 disabled
               >
                 {item.label}

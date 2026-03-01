@@ -1,26 +1,32 @@
 import { APP_CONFIG, SOCIAL_CONFIG } from "@/config";
 import { SECTION_IDS } from "@/constants/routes";
+import type { ReactNode } from "react";
 
 function StoreButton({
   href,
   topText,
   label,
   tuneIn = false,
+  icon,
 }: {
   href?: string;
   topText?: string;
   label: string;
   tuneIn?: boolean;
+  icon?: ReactNode;
 }) {
   const className = tuneIn
     ? "btn btn-neutral h-[64px] min-h-[64px] rounded-xl border border-white/25 bg-black text-[#21c8c4] hover:bg-black"
     : "btn btn-neutral h-[64px] min-h-[64px] rounded-xl border border-white/25 bg-[#2a313f] text-white hover:bg-[#2f3746]";
 
   const content = (
-    <span className="text-center leading-none">
-      {topText && <span className="mb-0.5 block text-[12px] font-medium text-white/80">{topText}</span>}
-      <span className={`block font-semibold ${tuneIn ? "text-[56px] scale-y-[0.68] tracking-tight" : "text-[38px] scale-y-[0.72]"}`}>
-        {label}
+    <span className="text-center leading-none flex items-center justify-center gap-2">
+      {icon && <span className="flex-shrink-0">{icon}</span>}
+      <span>
+        {topText && <span className="mb-0.5 block text-[12px] font-medium text-white/80">{topText}</span>}
+        <span className={`block font-semibold ${tuneIn ? "text-[56px] scale-y-[0.68] tracking-tight" : "text-[38px] scale-y-[0.72]"}`}>
+          {label}
+        </span>
       </span>
     </span>
   );
@@ -73,8 +79,16 @@ export default function Contact() {
 
                   <div className="mt-3 grid gap-2 sm:grid-cols-3">
                     <StoreButton href={APP_CONFIG.TUNEIN_URL || undefined} label="tunein" tuneIn />
-                    <StoreButton href={APP_CONFIG.ANDROID_APP_URL || undefined} topText="Disponible en" label="Google play" />
-                    <StoreButton href={APP_CONFIG.IPHONE_APP_URL || undefined} topText="Disponible en el" label="App Store" />
+                    <StoreButton
+                      href={APP_CONFIG.ANDROID_APP_URL || undefined}
+                      topText="Disponible en"
+                      label="Google Play"
+                    />
+                    <StoreButton
+                      href={APP_CONFIG.IPHONE_APP_URL || undefined}
+                      topText="Proximamente en"
+                      label="App Store"
+                    />
                   </div>
                 </div>
               </div>
@@ -88,10 +102,10 @@ export default function Contact() {
               href={SOCIAL_CONFIG.FACEBOOK_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn btn-primary h-[78px] min-h-[78px] w-[270px] rounded-lg border border-white/20 bg-gradient-to-r from-[#355fb5] to-[#2f57aa] text-4xl font-bold text-white hover:brightness-110"
+              className="btn btn-primary h-[78px] min-h-[78px] w-[270px] rounded-lg border border-white/20 bg-gradient-to-r from-[#355fb5] to-[#2f57aa] text-4xl font-bold text-white hover:brightness-110 flex items-center justify-center gap-2"
               aria-label="Facebook"
             >
-              f
+              Facebook
             </a>
           </div>
         )}
