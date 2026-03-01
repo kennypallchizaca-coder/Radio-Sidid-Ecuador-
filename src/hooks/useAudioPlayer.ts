@@ -1,9 +1,12 @@
 /**
  * useAudioPlayer — Reproduce un stream en vivo (API pública EC + fallback).
- * Estado y controles expuestos para el reproductor global.
+ * Estrategia universal: funciona en iOS, Android, Samsung, Huawei y Desktop.
+ *
+ * Patrón: src → load() → esperar canplay → play()
+ * Este orden es el único que funciona de forma fiable en TODOS los móviles.
  */
 
-import { useRef, useState, useCallback, useEffect, useMemo } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { APP_CONFIG } from "@/config";
 import { resolveEcuadorRadioStream } from "@/services/radioBrowser";
 
@@ -25,45 +28,35 @@ export interface AudioPlayerControls {
   toggleMute: () => void;
 }
 
-/** Detecta iOS Safari (necesita play() sin load()) */
-const isIOS = () =>
-  /iP(hone|ad|od)/i.test(navigator.userAgent) ||
-  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-
-/** Detecta Android (necesita load() antes de play()) */
-const isAndroid = () => /Android/i.test(navigator.userAgent);
-
 export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
-  const audio = useMemo(() => {
-    const a = new Audio();
-    a.preload = "none"; // Android: evitar carga automática antes de tocar play
-    a.setAttribute("playsinline", "true");
-    a.setAttribute("webkit-playsinline", "true"); // Samsung Internet legacy
-    return a;
-  }, []);
-
-  const audioRef = useRef(audio);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [status, setStatus] = useState<PlayerStatus>("idle");
   const [volume, setVolumeState] = useState(0.75);
   const [isMuted, setIsMuted] = useState(false);
+
   const statusRef = useRef(status);
+  const volumeRef = useRef(volume);
+  const isMutedRef = useRef(isMuted);
   const streamUrlRef = useRef<string>(APP_CONFIG.STREAM_URL);
   const resolvingStreamRef = useRef<Promise<string> | null>(null);
   const playRequestIdRef = useRef(0);
+  const retryCountRef = useRef(0);
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => { statusRef.current = status; }, [status]);
+  useEffect(() => { volumeRef.current = volume; }, [volume]);
+  useEffect(() => { isMutedRef.current = isMuted; }, [isMuted]);
 
+  // ── Resolver URL del stream ──────────────────────────────────────────────
   const resolveStreamUrl = useCallback(async (): Promise<string> => {
     if (!APP_CONFIG.USE_PUBLIC_RADIO_API) return APP_CONFIG.STREAM_URL;
     if (resolvingStreamRef.current) return resolvingStreamRef.current;
 
     const pending = (async () => {
-      // Intentar servidor principal + fallbacks
       const servers = [
         APP_CONFIG.RADIO_API_BASE_URL,
         ...APP_CONFIG.RADIO_API_FALLBACK_URLS,
       ];
-
       for (const baseUrl of servers) {
         try {
           const resolved = await resolveEcuadorRadioStream({
@@ -74,185 +67,154 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
             excludedKeywords: APP_CONFIG.RADIO_API_EXCLUDED_KEYWORDS,
             limit: 60,
           });
-
           if (resolved) {
             streamUrlRef.current = resolved.streamUrl;
             return resolved.streamUrl;
           }
-        } catch {
-          // intentar siguiente servidor
-        }
+        } catch { /* siguiente servidor */ }
       }
-
       streamUrlRef.current = APP_CONFIG.STREAM_URL;
       return APP_CONFIG.STREAM_URL;
-    })().finally(() => {
-      resolvingStreamRef.current = null;
-    });
+    })().finally(() => { resolvingStreamRef.current = null; });
 
     resolvingStreamRef.current = pending;
     return pending;
   }, []);
 
-  const safePlay = useCallback((a: HTMLAudioElement, withLoad = false) => {
-    const doPlay = () => {
+  // ── Reintentos con backoff exponencial ───────────────────────────────────
+  const scheduleRetry = useCallback((url: string, requestId: number) => {
+    if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+    const count = retryCountRef.current;
+    if (count >= 5) return; // máximo 5 reintentos
+    const delay = Math.min(1500 * Math.pow(2, count), 20000); // 1.5s → 3s → 6s → 12s → 20s
+    retryCountRef.current += 1;
+    retryTimerRef.current = setTimeout(() => {
+      if (playRequestIdRef.current === requestId && statusRef.current !== "paused") {
+        startPlayback(url, requestId);
+      }
+    }, delay);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── Motor de reproducción universal ─────────────────────────────────────
+  // Patrón: src → load() → esperar canplay → play()
+  // Funciona en iOS Safari, Chrome Android, Samsung Internet, Huawei Browser y Desktop.
+  const startPlayback = useCallback((url: string, requestId: number) => {
+    if (playRequestIdRef.current !== requestId) return;
+
+    // Crear elemento <audio> fresco para evitar estado residual de la reproducción anterior
+    const prev = audioRef.current;
+    if (prev) { prev.pause(); prev.src = ""; }
+
+    const a = document.createElement("audio");
+    a.preload = "none";
+    a.setAttribute("playsinline", "true");
+    a.setAttribute("webkit-playsinline", "true"); // Samsung Internet legacy
+    a.volume = isMutedRef.current ? 0 : volumeRef.current;
+    audioRef.current = a;
+
+    const onCanPlay = () => {
+      if (playRequestIdRef.current !== requestId) return;
       a.play().catch((err: DOMException) => {
-        if (err.name === "AbortError") {
-          // Android: load() interrumpió una llamada play() anterior — reintentar
-          setTimeout(() => safePlay(a), 300);
-          return;
-        }
-        if (err.name === "NotAllowedError") {
-          setStatus("idle");
-          return;
-        }
-        if (err.name === "NotSupportedError") {
-          setStatus("error");
-          return;
-        }
+        // AbortError: una operación posterior canceló esta — ignorar
+        if (err.name === "AbortError") return;
+        // NotAllowedError: el navegador exige gesto del usuario (muy raro en toggle)
+        if (err.name === "NotAllowedError") { setStatus("idle"); return; }
         setStatus("error");
+        scheduleRetry(url, requestId);
       });
     };
 
-    if (withLoad || isAndroid()) {
-      // Android/Samsung: load() es obligatorio para iniciar un stream nuevo
-      a.load();
-      a.addEventListener("canplay", doPlay, { once: true });
-    } else if (isIOS()) {
-      // iOS Safari: NO llamar load() — provoca AbortError
-      if (a.readyState >= 2) {
-        doPlay();
-      } else {
-        a.addEventListener("canplay", doPlay, { once: true });
-      }
-    } else {
-      // Desktop / otros navegadores
-      doPlay();
-    }
-  }, []);
-
-  useEffect(() => {
-    audioRef.current.volume = isMuted ? 0 : volume;
-  }, [volume, isMuted]);
-
-  useEffect(() => {
-    const a = audioRef.current;
-
-    const onWaiting = () => setStatus("loading");
-    const onPlaying = () => setStatus("playing");
-    const onPause = () => {
-      // En iOS el sistema puede pausar el audio (llamada, bloqueo de pantalla)
-      // Solo marcar como paused si no estamos en proceso de carga
-      if (statusRef.current !== "loading") setStatus("paused");
-    };
-
-    let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
-    const onError = () => {
-      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+    a.addEventListener("canplay", onCanPlay, { once: true });
+    a.addEventListener("playing", () => {
+      if (playRequestIdRef.current !== requestId) return;
+      retryCountRef.current = 0;
+      setStatus("playing");
+    });
+    a.addEventListener("waiting", () => setStatus("loading"));
+    a.addEventListener("pause", () => {
+      // Ignorar pauses transitorias durante la carga
+      if (statusRef.current === "loading") return;
+      if (!a.src) return; // pausado intencionalmente (src vaciado en toggle)
+      setStatus("paused");
+    });
+    a.addEventListener("error", () => {
+      if (playRequestIdRef.current !== requestId) return;
       setStatus("error");
-      // Reintentar automáticamente después de 4s (conexión móvil inestable)
-      reconnectTimeout = setTimeout(() => {
-        if (statusRef.current === "error") {
-          a.src = streamUrlRef.current || APP_CONFIG.STREAM_URL;
-          safePlay(a);
+      scheduleRetry(url, requestId);
+    });
+    a.addEventListener("ended", () => {
+      // Los streams en vivo no terminan — reconectar de inmediato
+      if (playRequestIdRef.current === requestId) startPlayback(url, requestId);
+    });
+    a.addEventListener("stalled", () => {
+      if (statusRef.current === "paused") return;
+      if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+      retryTimerRef.current = setTimeout(() => {
+        if (statusRef.current !== "paused" && playRequestIdRef.current === requestId) {
+          startPlayback(url, requestId);
         }
       }, 4000);
-    };
+    });
 
-    const onProgress = () => {
-      if (a.buffered.length > 0) {
-        const end = a.buffered.end(a.buffered.length - 1);
-        const delay = end - a.currentTime;
-        if (delay > 3) a.currentTime = end - 0.5;
-      }
-    };
+    // Asignar src y disparar load() — el orden correcto para todos los navegadores
+    a.src = url;
+    a.load();
+  }, [scheduleRetry]);
 
-    let stallTimeout: ReturnType<typeof setTimeout> | null = null;
-    const onStalled = () => {
-      if (statusRef.current === "playing" || statusRef.current === "loading") {
-        stallTimeout = setTimeout(() => {
-          if (statusRef.current !== "paused") {
-            a.src = streamUrlRef.current || APP_CONFIG.STREAM_URL;
-            safePlay(a);
-          }
-        }, 3500);
-      }
-    };
+  // ── Actualizar volumen en tiempo real ───────────────────────────────────
+  useEffect(() => {
+    const a = audioRef.current;
+    if (a) a.volume = isMuted ? 0 : volume;
+  }, [volume, isMuted]);
 
-    // Android/Samsung: el stream nunca debería terminar, pero si ocurre — reconectar
-    const onEnded = () => {
-      if (streamUrlRef.current) {
-        a.src = streamUrlRef.current;
-        safePlay(a);
-      }
-    };
-
-    // Android: pantalla bloqueada puede pausar el audio sin disparar evento pause
+  // ── Recuperar reproducción al volver a la app (pantalla bloqueada) ──────
+  useEffect(() => {
     const onVisibilityChange = () => {
-      if (document.visibilityState === "visible" &&
-          statusRef.current === "playing" && a.paused) {
-        safePlay(a);
+      const a = audioRef.current;
+      if (!a) return;
+      if (
+        document.visibilityState === "visible" &&
+        statusRef.current === "playing" &&
+        a.paused && a.src
+      ) {
+        a.play().catch(() => {
+          if (a.src) startPlayback(a.src, playRequestIdRef.current);
+        });
       }
     };
-
-    a.addEventListener("waiting", onWaiting);
-    a.addEventListener("playing", onPlaying);
-    a.addEventListener("pause", onPause);
-    a.addEventListener("error", onError);
-    a.addEventListener("progress", onProgress);
-    a.addEventListener("stalled", onStalled);
-    a.addEventListener("ended", onEnded);
     document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", onVisibilityChange);
+  }, [startPlayback]);
 
-    return () => {
-      if (stallTimeout) clearTimeout(stallTimeout);
-      if (reconnectTimeout) clearTimeout(reconnectTimeout);
-      a.removeEventListener("waiting", onWaiting);
-      a.removeEventListener("playing", onPlaying);
-      a.removeEventListener("pause", onPause);
-      a.removeEventListener("error", onError);
-      a.removeEventListener("progress", onProgress);
-      a.removeEventListener("stalled", onStalled);
-      a.removeEventListener("ended", onEnded);
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-    };
-  }, [safePlay]);
-
+  // ── Toggle play/pause ───────────────────────────────────────────────────
   const toggle = useCallback(() => {
     const a = audioRef.current;
-    playRequestIdRef.current += 1;
-    const requestId = playRequestIdRef.current;
 
     if (status === "playing" || status === "loading") {
-      a.pause();
-      a.src = "";
+      playRequestIdRef.current += 1;
+      if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+      retryCountRef.current = 0;
+      if (a) { a.pause(); a.src = ""; }
       setStatus("paused");
       return;
     }
 
+    playRequestIdRef.current += 1;
+    const requestId = playRequestIdRef.current;
+    retryCountRef.current = 0;
     setStatus("loading");
+
     void (async () => {
-      const streamUrl = await resolveStreamUrl();
-      if (playRequestIdRef.current !== requestId) return;
-
-      const currentAudio = audioRef.current;
-      currentAudio.src = streamUrl;
-      safePlay(currentAudio);
+      const url = await resolveStreamUrl();
+      startPlayback(url, requestId);
     })();
-  }, [status, safePlay, resolveStreamUrl]);
+  }, [status, resolveStreamUrl, startPlayback]);
 
-  useEffect(() => {
-    void resolveStreamUrl();
-  }, [resolveStreamUrl]);
+  // ── Pre-resolver URL al montar ───────────────────────────────────────────
+  useEffect(() => { void resolveStreamUrl(); }, [resolveStreamUrl]);
 
-  const setVolume = useCallback((vol: number) => {
-    const clamped = Math.min(1, Math.max(0, vol));
-    setVolumeState(clamped);
-    if (clamped > 0) setIsMuted(false);
-  }, []);
-
-  const toggleMute = useCallback(() => setIsMuted((prev) => !prev), []);
-
+  // ── Media Session API (controles en pantalla bloqueada) ─────────────────
   useEffect(() => {
     if (!("mediaSession" in navigator)) return;
     try {
@@ -264,24 +226,34 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
           { src: APP_CONFIG.LOGO_URL || "/logoradio.jpg", sizes: "512x512", type: "image/jpeg" },
         ],
       });
-      navigator.mediaSession.playbackState = (status === "playing" || status === "loading") ? "playing" : "paused";
+      navigator.mediaSession.playbackState =
+        (status === "playing" || status === "loading") ? "playing" : "paused";
       navigator.mediaSession.setActionHandler("play", toggle);
       navigator.mediaSession.setActionHandler("pause", toggle);
-    } catch {
-      // ignore
-    }
+      navigator.mediaSession.setActionHandler("stop", toggle);
+    } catch { /* ignore */ }
   }, [status, toggle]);
 
+  // ── Título de página ─────────────────────────────────────────────────────
   useEffect(() => {
     document.title = `${APP_CONFIG.RADIO_NAME} — ${APP_CONFIG.SLOGAN}`;
   }, []);
+
+  // ── Controles de volumen ─────────────────────────────────────────────────
+  const setVolume = useCallback((vol: number) => {
+    const clamped = Math.min(1, Math.max(0, vol));
+    setVolumeState(clamped);
+    if (clamped > 0) setIsMuted(false);
+  }, []);
+
+  const toggleMute = useCallback(() => setIsMuted((prev) => !prev), []);
 
   const state: AudioPlayerState = {
     status,
     isPlaying: status === "playing",
     isLoading: status === "loading",
     hasError: status === "error",
-    errorMessage: "No se pudo conectar. Intenta más tarde.",
+    errorMessage: "No se pudo conectar. Reintentando…",
     volume,
     isMuted,
   };
