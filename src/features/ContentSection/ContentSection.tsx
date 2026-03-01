@@ -22,7 +22,7 @@ export default function ContentSection() {
       <div className="mx-auto grid max-w-[1180px] grid-cols-1 auto-rows-auto gap-3 sm:grid-cols-2 sm:grid-rows-[200px_280px] sm:gap-4 lg:grid-rows-[240px_400px]">
         {/* ── Player Panel ── */}
         <Panel>
-          <div className="relative flex h-full flex-col overflow-hidden rounded-lg border border-[#1e3fa8]/60 bg-gradient-to-b from-[#0a1d5e] via-[#060f38] to-[#020820]">
+          <div className="relative flex h-full min-h-[160px] flex-col overflow-hidden rounded-lg border border-[#1e3fa8]/60 bg-gradient-to-b from-[#0a1d5e] via-[#060f38] to-[#020820] sm:min-h-0">
             {/* Ambient glow */}
             <div className={`pointer-events-none absolute -top-8 left-1/2 h-24 w-40 -translate-x-1/2 rounded-full blur-3xl transition-opacity duration-700 ${playerState.isPlaying ? "bg-[#f3932c]/30 opacity-100" : "opacity-0"}`} />
 
