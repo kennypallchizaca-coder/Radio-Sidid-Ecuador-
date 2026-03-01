@@ -1,8 +1,9 @@
 import { APP_CONFIG } from "@/config";
 import { SECTION_IDS } from "@/constants/routes";
+import bannerDefault from "@/assets/img/banner01.jpg";
 
 export default function Hero() {
-  const bannerSrc = APP_CONFIG.BANNER_IMAGE_URL || "/img/banner01.jpg";
+  const bannerSrc = APP_CONFIG.BANNER_IMAGE_URL || bannerDefault;
 
   return (
     <section

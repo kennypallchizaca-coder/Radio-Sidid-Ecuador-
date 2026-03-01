@@ -17,8 +17,6 @@ export interface AudioPlayerState {
   errorMessage: string;
   volume: number;
   isMuted: boolean;
-  trackTitle: string;
-  trackArtist: string;
 }
 
 export interface AudioPlayerControls {
@@ -39,7 +37,6 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
   const [status, setStatus] = useState<PlayerStatus>("idle");
   const [volume, setVolumeState] = useState(0.75);
   const [isMuted, setIsMuted] = useState(false);
-  const [trackTitle, setTrackTitle] = useState<string>(APP_CONFIG.RADIO_NAME);
   const statusRef = useRef(status);
   const streamUrlRef = useRef<string>(APP_CONFIG.STREAM_URL);
   const resolvingStreamRef = useRef<Promise<string> | null>(null);
@@ -64,7 +61,6 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
 
         if (resolved) {
           streamUrlRef.current = resolved.streamUrl;
-          setTrackTitle(resolved.stationName);
           return resolved.streamUrl;
         }
       } catch {
@@ -72,7 +68,6 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
       }
 
       streamUrlRef.current = APP_CONFIG.STREAM_URL;
-      setTrackTitle(APP_CONFIG.RADIO_NAME);
       return APP_CONFIG.STREAM_URL;
     })().finally(() => {
       resolvingStreamRef.current = null;
@@ -187,9 +182,9 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
     if (!("mediaSession" in navigator)) return;
     try {
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: trackTitle,
-        artist: "En vivo",
-        album: APP_CONFIG.SLOGAN,
+        title: APP_CONFIG.RADIO_NAME,
+        artist: APP_CONFIG.SLOGAN,
+        album: "",
         artwork: [
           { src: APP_CONFIG.LOGO_URL || "/logoradio.jpg", sizes: "512x512", type: "image/jpeg" },
         ],
@@ -200,7 +195,7 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
     } catch {
       // ignore
     }
-  }, [status, toggle, trackTitle]);
+  }, [status, toggle]);
 
   useEffect(() => {
     document.title = `${APP_CONFIG.RADIO_NAME} — ${APP_CONFIG.SLOGAN}`;
@@ -214,8 +209,6 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
     errorMessage: "No se pudo conectar. Intenta más tarde.",
     volume,
     isMuted,
-    trackTitle,
-    trackArtist: "En vivo",
   };
 
   return [state, { toggle, setVolume, toggleMute }];

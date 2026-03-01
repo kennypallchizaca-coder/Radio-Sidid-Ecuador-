@@ -7,7 +7,7 @@ interface RadioBrowserStation {
   votes?: number;
 }
 
-export interface ResolveRadioOptions {
+interface ResolveRadioOptions {
   baseUrl: string;
   countryCode: string;
   preferredStations?: readonly string[];
@@ -16,7 +16,7 @@ export interface ResolveRadioOptions {
   limit?: number;
 }
 
-export interface ResolvedRadioStream {
+interface ResolvedRadioStream {
   streamUrl: string;
   stationName: string;
 }
@@ -45,10 +45,14 @@ function isBlockedPlaylist(value: string): boolean {
   return URL_BLOCKLIST.some((ext) => lower.includes(ext));
 }
 
+function upgradeToHttps(url: string): string {
+  return url.replace(/^http:\/\//i, "https://");
+}
+
 function pickStreamUrl(station: RadioBrowserStation): string | null {
   const candidate = (station.url_resolved ?? station.url ?? "").trim();
   if (!candidate || !isHttpUrl(candidate) || isBlockedPlaylist(candidate)) return null;
-  return candidate;
+  return upgradeToHttps(candidate);
 }
 
 function isPlayableStation(station: RadioBrowserStation): boolean {

@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import { SECTION_IDS } from "@/constants/routes";
+import imagen2Src from "@/assets/img/imagen2.png";
+import bienvenidosSrc from "@/assets/img/bienvenidos.png";
+import iglesiaSrc from "@/assets/img/iglesia.jpg";
 
 const SECOND_CARD_IMAGES = [
-  { src: "/img/bienvenidos.png", alt: "Imagen promocional 3" },
-  { src: "/img/iglesia.jpg", alt: "Imagen promocional 4" },
+  { src: bienvenidosSrc, alt: "Imagen promocional 3" },
+  { src: iglesiaSrc, alt: "Imagen promocional 4" },
 ];
 
 export default function Gallery() {
@@ -22,15 +25,15 @@ export default function Gallery() {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
           <article className="overflow-hidden rounded-xl border border-[#123da8]/75 bg-[#020718] p-2.5 shadow-[0_12px_35px_rgba(0,0,0,0.35)]">
             <img
-              src="/img/imagen2.png"
+              src={imagen2Src}
               alt="Imagen promocional 1"
-              className="h-[240px] w-full rounded-md object-cover object-center sm:h-[520px] lg:h-[520px]"
+              className="aspect-[4/3] w-full rounded-md object-cover object-center sm:aspect-auto sm:h-[520px] lg:h-[520px]"
               loading="lazy"
             />
           </article>
 
           <article className="overflow-hidden rounded-xl border border-[#123da8]/75 bg-[#020718] p-2.5 shadow-[0_12px_35px_rgba(0,0,0,0.35)]">
-            <div className="relative h-[240px] w-full overflow-hidden rounded-md sm:h-[520px] lg:h-[520px]">
+            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-md sm:aspect-auto sm:h-[520px] lg:h-[520px]">
               {SECOND_CARD_IMAGES.map((image, index) => (
                 <img
                   key={image.src}

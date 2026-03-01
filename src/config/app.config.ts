@@ -13,8 +13,6 @@ export const APP_CONFIG = {
   // ── Nombre e identidad ──────────────────────────────────────
   RADIO_NAME: "Radio Sisid Ecuador",
   SLOGAN: "La voz del pueblo cañari",
-  LOCATION: "Minneapolis, Minnesota, EE.UU.",
-  COUNTRY_CODE: "US",
 
   // ── Logo ────────────────────────────────────────────────────
   // ► Para usar tu propio logo:
@@ -44,9 +42,6 @@ export const APP_CONFIG = {
     "canari",
     "cañari",
     "cumbia",
-    "reggaeton",
-    "regueton",
-    "reggaetón",
   ] as const,
   // Opcional: palabras a excluir (ejemplo: "rock", "cumbia").
   RADIO_API_EXCLUDED_KEYWORDS: [] as const,
@@ -58,8 +53,6 @@ export const APP_CONFIG = {
   IPHONE_APP_URL: "", // ej: "https://apps.apple.com/.../id..."
 
   // ── SEO / Meta ───────────────────────────────────────────────
-  META_DESCRIPTION: "Radio Sisid Ecuador — La voz del pueblo cañari. Desde Minneapolis, Minnesota hacia el mundo.",
-  META_KEYWORDS: "radio, ecuador, cañari, en vivo, streaming, minneapolis, minnesota, radio online",
   OG_IMAGE_URL: "/img/seo-banner.png",
 
   // ── Video embed (YouTube, Twitch, etc.) ──────────────────────
@@ -68,5 +61,3 @@ export const APP_CONFIG = {
 
   // ── opciones de radio API se incluyen como valores por defecto arriba
 } as const;
-
-export type AppConfig = typeof APP_CONFIG;

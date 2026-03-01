@@ -2,6 +2,7 @@ import { PlayIcon, PauseIcon, SpeakerLoudIcon, SpeakerOffIcon } from "@radix-ui/
 import { useState, type ReactNode } from "react";
 import { APP_CONFIG } from "@/config";
 import { useAudio } from "@/context";
+import image3Src from "@/assets/img/image3.png";
 
 function Panel({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
@@ -18,7 +19,7 @@ export default function ContentSection() {
 
   return (
     <section aria-label="Audio y video" className="px-3 py-4 sm:px-5 sm:py-5">
-      <div className="mx-auto grid max-w-[1180px] grid-cols-1 grid-rows-[200px_280px_220px] gap-3 sm:grid-cols-2 sm:grid-rows-[200px_280px] sm:gap-4 lg:grid-rows-[240px_400px]">
+      <div className="mx-auto grid max-w-[1180px] grid-cols-1 grid-rows-[repeat(3,220px)] gap-3 sm:grid-cols-2 sm:grid-rows-[200px_280px] sm:gap-4 lg:grid-rows-[240px_400px]">
         {/* ── Player Panel ── */}
         <Panel>
           <div className="relative flex h-full flex-col overflow-hidden rounded-lg border border-[#1e3fa8]/60 bg-gradient-to-b from-[#0a1d5e] via-[#060f38] to-[#020820]">
@@ -121,12 +122,7 @@ export default function ContentSection() {
         <div className="sm:row-span-2">
           <Panel>
             <div className="relative aspect-[16/10] h-full overflow-hidden rounded-lg border border-white/10 md:aspect-auto">
-              <img src="/img/image3.png" alt="Promocion de radio" className="h-full w-full object-cover" loading="lazy" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#04091fd6] via-transparent to-transparent" />
-              <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3">
-                <p className="font-display text-xl leading-none text-white sm:text-2xl lg:text-4xl">Siempre Contigo</p>
-                <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-yellow-300 sm:text-[10px] lg:text-xs">Radio en vivo</p>
-              </div>
+              <img src={image3Src} alt="Promocion de radio" className="h-full w-full object-cover" loading="lazy" />
             </div>
           </Panel>
         </div>
