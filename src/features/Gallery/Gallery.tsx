@@ -17,20 +17,20 @@ export default function Gallery() {
   }, []);
 
   return (
-    <section id={SECTION_IDS.GALERIA} aria-label="Galeria" className="px-3 py-4 sm:px-5 sm:py-5 min-h-[320px] sm:min-h-[480px] lg:min-h-[440px]">
+    <section id={SECTION_IDS.GALERIA} aria-label="Galeria" className="px-3 py-4 sm:px-5 sm:py-5 min-h-[400px] sm:min-h-[560px] lg:min-h-[540px]">
       <div className="mx-auto max-w-[1180px]">
         <div className="grid grid-cols-2 gap-3 sm:gap-4">
           <article className="overflow-hidden rounded-xl border border-[#123da8]/75 bg-[#020718] p-2.5 shadow-[0_12px_35px_rgba(0,0,0,0.35)]">
             <img
               src="/img/imagen2.png"
               alt="Imagen promocional 1"
-              className="h-[190px] w-full rounded-md object-cover object-center sm:h-[420px] lg:h-[420px]"
+              className="h-[240px] w-full rounded-md object-cover object-center sm:h-[520px] lg:h-[520px]"
               loading="lazy"
             />
           </article>
 
           <article className="overflow-hidden rounded-xl border border-[#123da8]/75 bg-[#020718] p-2.5 shadow-[0_12px_35px_rgba(0,0,0,0.35)]">
-            <div className="relative h-[190px] w-full overflow-hidden rounded-md sm:h-[420px] lg:h-[420px]">
+            <div className="relative h-[240px] w-full overflow-hidden rounded-md sm:h-[520px] lg:h-[520px]">
               {SECOND_CARD_IMAGES.map((image, index) => (
                 <img
                   key={image.src}
