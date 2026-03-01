@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { SECTION_IDS } from "@/constants/routes";
-import imagen2Src from "@/assets/img/imagen2.png";
-import foto1Src from "@/assets/img/foto1.png";
-import foto2Src from "@/assets/img/foto2.png";
-import bienvenidosSrc from "@/assets/img/bienvenidos.png";
+import imagen2Src from "@/assets/img/imagen2.jpg";
+import foto1Src from "@/assets/img/foto1.jpg";
+import foto2Src from "@/assets/img/foto2.jpg";
+import bienvenidosSrc from "@/assets/img/bienvenidos.jpg";
 import iglesiaSrc from "@/assets/img/iglesia.jpg";
-import iglesia2Src from "@/assets/img/iglesia2.png";
+import iglesia2Src from "@/assets/img/iglesia2.jpg";
 
 const FIRST_CARD_IMAGES = [
   { src: foto1Src, alt: "Imagen promocional 1" },

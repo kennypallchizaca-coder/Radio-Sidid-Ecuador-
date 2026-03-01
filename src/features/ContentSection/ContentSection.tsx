@@ -2,7 +2,7 @@ import { PlayIcon, PauseIcon, SpeakerLoudIcon, SpeakerOffIcon, ChevronLeftIcon, 
 import { useEffect, useState, type ReactNode } from "react";
 import { APP_CONFIG } from "@/config";
 import { useAudio } from "@/context";
-import image3Src from "@/assets/img/radio-sisid.png";
+import image3Src from "@/assets/img/radio-sisid.jpg";
 
 const VIDEOS = [
   ...(APP_CONFIG.VIDEO_EMBED_URL ? [APP_CONFIG.VIDEO_EMBED_URL] : []),

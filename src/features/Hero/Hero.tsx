@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { APP_CONFIG } from "@/config";
 import { SECTION_IDS } from "@/constants/routes";
-import bannerDefault from "@/assets/img/bannernuevo.png";
-import djGato from "@/assets/img/djgato.png";
+import bannerDefault from "@/assets/img/bannernuevo.jpg";
+import djGato from "@/assets/img/djgato.jpg";
 
 const SLIDES = [bannerDefault, djGato];
 const INTERVAL_MS = 4500;
