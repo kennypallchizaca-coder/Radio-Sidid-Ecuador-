@@ -14,9 +14,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'vendor-core': ['react', 'react-dom'],
-          'vendor-ui': ['framer-motion', 'lucide-react'],
-          'vendor-three': ['three', '@react-three/fiber'],
+          vendor: ['react', 'react-dom', '@radix-ui/react-icons'],
         },
       },
     },

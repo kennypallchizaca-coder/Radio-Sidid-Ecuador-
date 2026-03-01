@@ -1,142 +1,100 @@
-import { SOCIAL_CONFIG, getWhatsAppUrl } from "@/config";
+import { APP_CONFIG, SOCIAL_CONFIG } from "@/config";
 import { SECTION_IDS } from "@/constants/routes";
-import { motion } from "framer-motion";
 
-/* ── Íconos SVG compactos ──────────────────────────────────── */
-const Icon = ({ children, size = 22 }: { children: React.ReactNode; size?: number }) => (
-  <svg width={size} height={size} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">{children}</svg>
-);
+function StoreButton({
+  href,
+  topText,
+  label,
+  tuneIn = false,
+}: {
+  href?: string;
+  topText?: string;
+  label: string;
+  tuneIn?: boolean;
+}) {
+  const className = tuneIn
+    ? "btn btn-neutral h-[64px] min-h-[64px] rounded-xl border border-white/25 bg-black text-[#21c8c4] hover:bg-black"
+    : "btn btn-neutral h-[64px] min-h-[64px] rounded-xl border border-white/25 bg-[#2a313f] text-white hover:bg-[#2f3746]";
 
-const IconWhatsApp = () => <Icon><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.885-9.885 9.885m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></Icon>;
-const IconFacebook = () => <Icon><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></Icon>;
-const IconYouTube = () => <Icon><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" /></Icon>;
-const IconInstagram = () => <Icon><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" /></Icon>;
+  const content = (
+    <span className="text-center leading-none">
+      {topText && <span className="mb-0.5 block text-[12px] font-medium text-white/80">{topText}</span>}
+      <span className={`block font-semibold ${tuneIn ? "text-[56px] scale-y-[0.68] tracking-tight" : "text-[38px] scale-y-[0.72]"}`}>
+        {label}
+      </span>
+    </span>
+  );
 
-/* ── Datos de cards ────────────────────────────────────────── */
-const CARDS = [
-  {
-    name: "Facebook",
-    href: SOCIAL_CONFIG.FACEBOOK_URL,
-    color: "#1877F2",
-    bg: "bg-[#1877F2]",
-    labelBg: "bg-blue-400",
-    icon: <IconFacebook />,
-    cta: "VISITAR PÁGINA",
-    desc: "Transmisiones en vivo y eventos",
-  },
-  {
-    name: "Instagram",
-    href: SOCIAL_CONFIG.INSTAGRAM_URL,
-    color: "#E1306C",
-    bg: "bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7]",
-    labelBg: "bg-pink-400",
-    icon: <IconInstagram />,
-    cta: "VER PERFIL",
-    desc: "Fotos, historias y momentos",
-  },
-  {
-    name: "YouTube",
-    href: SOCIAL_CONFIG.YOUTUBE_URL,
-    color: "#FF0000",
-    bg: "bg-[#FF0000]",
-    labelBg: "bg-red-400",
-    icon: <IconYouTube />,
-    cta: "VER CANAL",
-    desc: "Videos y transmisiones en vivo",
-  },
-  {
-    name: "WhatsApp",
-    href: getWhatsAppUrl(),
-    color: "#25D366",
-    bg: "bg-[#25D366]",
-    labelBg: "bg-emerald-400",
-    icon: <IconWhatsApp />,
-    cta: "ENVIAR MENSAJE",
-    desc: SOCIAL_CONFIG.WHATSAPP_DISPLAY,
-  },
-];
+  if (!href) {
+    return (
+      <span className={`${className} pointer-events-none opacity-80`}>
+        {content}
+      </span>
+    );
+  }
+
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+      {content}
+    </a>
+  );
+}
 
 export default function Contact() {
   return (
-    <section
-      id={SECTION_IDS.CONTACTO}
-      aria-labelledby="contact-title"
-      className="py-20 sm:py-28 relative overflow-hidden font-mono"
-    >
-      <div className="max-w-5xl mx-auto px-5 sm:px-8 relative z-10">
+    <section id={SECTION_IDS.CONTACTO} aria-labelledby="contact-title" className="px-3 py-7 sm:px-5 sm:py-9">
+      <div className="mx-auto max-w-[1180px]">
+        <h2 id="contact-title" className="mb-6 text-center text-4xl font-bold text-white sm:text-5xl uppercase tracking-tight">
+          Contáctanos
+        </h2>
 
-        {/* ── Header Moderno ─────────────────────────────────── */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-12 sm:mb-16 flex flex-col items-center gap-4"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
-            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-            <span className="text-xs font-semibold tracking-widest uppercase text-white/70">En vivo para ti</span>
+        <div className="card rounded-sm border border-[#1b266c] bg-gradient-to-br from-[#0a0f2a] to-[#131a4f] shadow-[0_18px_45px_rgba(0,0,0,0.42)]">
+          <div className="card-body rounded-none p-5">
+            <div className="relative overflow-hidden rounded-sm border border-[#11195b] bg-gradient-to-r from-[#f6a505] via-[#f3321d] to-[#31bcf4] p-3 sm:p-4">
+              <div className="absolute -left-10 -top-16 h-52 w-72 rounded-full bg-[#ff9100]/45" />
+              <div className="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-[#7438ff]/50 to-transparent" />
+
+              <div className="relative grid items-center gap-3 lg:grid-cols-[178px_1fr]">
+                <div className="mx-auto flex h-[164px] w-[164px] items-center justify-center rounded-[18px] border border-white/35 bg-gradient-to-b from-[#f8be2d] to-[#d67809] shadow-[0_10px_25px_rgba(0,0,0,0.35)]">
+                  <span className="text-center text-3xl font-black uppercase leading-[0.86] text-[#1a1a1a] [text-shadow:0_2px_0_rgba(255,255,255,0.28)]">
+                    Buena
+                    <br />
+                    Musica
+                  </span>
+                </div>
+
+                <div>
+                  <p className="text-center text-3xl font-black uppercase leading-[0.88] text-black sm:text-4xl lg:text-left xl:text-5xl">
+                    Escuchanos en tu telefono
+                  </p>
+                  <p className="mt-1 text-center text-2xl font-bold uppercase leading-[0.9] text-white sm:text-3xl lg:text-left xl:text-4xl">
+                    Descarga es gratis y escuchanos
+                  </p>
+
+                  <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                    <StoreButton href={APP_CONFIG.TUNEIN_URL || undefined} label="tunein" tuneIn />
+                    <StoreButton href={APP_CONFIG.ANDROID_APP_URL || undefined} topText="Disponible en" label="Google play" />
+                    <StoreButton href={APP_CONFIG.IPHONE_APP_URL || undefined} topText="Disponible en el" label="App Store" />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-
-          <h2
-            id="contact-title"
-            className="text-3xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-blue-500 to-red-500 tracking-tight"
-          >
-            Conéctate con<br />Nosotros
-          </h2>
-          <p className="text-sm sm:text-lg text-white/50 max-w-xl mx-auto font-medium px-4">
-            Síguenos en nuestras redes sociales para no perderte ninguna novedad, eventos especiales y las mejores mezclas.
-          </p>
-        </motion.div>
-
-        {/* Social Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-6xl mx-auto px-4">
-          {CARDS.map((card, i) => (
-            <motion.a
-              key={card.name}
-              href={card.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.4, delay: i * 0.1, type: "spring", bounce: 0.5 }}
-              className="group relative flex items-center gap-3 px-6 py-3 rounded-full overflow-hidden bg-white/[0.04] border border-white/10 hover:border-white/30 transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl shadow-black/40"
-            >
-              {/* Halógeno Background en Hover */}
-              <div
-                className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300 pointer-events-none"
-                style={{ background: `linear-gradient(135deg, ${card.color}, transparent)` }}
-              />
-
-              {/* Icono Reducido */}
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center text-white shrink-0 shadow-lg group-hover:rotate-12 transition-transform duration-300 [&>svg]:w-5 [&>svg]:h-5"
-                style={{ background: card.bg, boxShadow: `0 4px 12px -2px ${card.color}80` }}
-              >
-                {card.icon}
-              </div>
-
-              {/* Texto */}
-              <div className="flex flex-col pr-2">
-                <span className="text-sm font-bold text-white leading-tight">{card.name}</span>
-                <span className="text-[10px] text-white/50 font-medium uppercase tracking-widest">{card.cta}</span>
-              </div>
-
-              {/* Chevron derecho de interacción */}
-              <svg
-                className="w-4 h-4 ml-1 text-white/30 group-hover:text-white transition-all group-hover:translate-x-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </motion.a>
-          ))}
         </div>
 
+        {SOCIAL_CONFIG.FACEBOOK_URL && (
+          <div className="mt-7 flex justify-end">
+            <a
+              href={SOCIAL_CONFIG.FACEBOOK_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-primary h-[78px] min-h-[78px] w-[270px] rounded-lg border border-white/20 bg-gradient-to-r from-[#355fb5] to-[#2f57aa] text-4xl font-bold text-white hover:brightness-110"
+              aria-label="Facebook"
+            >
+              f
+            </a>
+          </div>
+        )}
       </div>
     </section>
   );

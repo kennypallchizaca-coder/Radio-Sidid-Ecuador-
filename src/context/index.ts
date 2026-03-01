@@ -1,4 +1,5 @@
 /**
  * context/index.ts — Barrel de contextos React
  */
-export { AudioProvider, useAudio } from "./AudioContext";
+export { AudioProvider } from "./AudioContext";
+export { useAudio } from "./useAudio";

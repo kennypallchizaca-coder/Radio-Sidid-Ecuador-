@@ -1,6 +1,5 @@
 /**
- * hooks/index.ts — Barrel de hooks personalizados
+ * hooks/index.ts
  */
 export { useAudioPlayer } from "./useAudioPlayer";
-export { useActiveSection } from "./useActiveSection";
 export type { AudioPlayerState, AudioPlayerControls } from "./useAudioPlayer";

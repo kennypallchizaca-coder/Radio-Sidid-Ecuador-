@@ -25,13 +25,3 @@ export const SOCIAL_CONFIG = {
   TWITTER_URL: "",   // Dejar vacío para ocultar el botón
   TIKTOK_URL: "",   // Dejar vacío para ocultar el botón
 } as const;
-
-/** Devuelve la URL completa de WhatsApp con el mensaje preformateado */
-export function getWhatsAppUrl(
-  number = SOCIAL_CONFIG.WHATSAPP_NUMBER,
-  message = SOCIAL_CONFIG.WHATSAPP_MESSAGE
-): string {
-  return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
-}
-
-export type SocialConfig = typeof SOCIAL_CONFIG;

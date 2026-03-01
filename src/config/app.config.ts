@@ -22,6 +22,8 @@ export const APP_CONFIG = {
   //   2. Cambia este valor a "/logo.png"
   //   Dejar vacío ("") usa el logo SVG embebido por defecto.
   LOGO_URL: "/logoradio.jpg",
+  // Imagen opcional para el banner principal (personaje/micrófono). Dejar "" para solo gradiente.
+  BANNER_IMAGE_URL: "",
 
   // ── Stream de audio ─────────────────────────────────────────
   // ► REEMPLAZA esta URL con la dirección real de tu servidor
@@ -29,10 +31,42 @@ export const APP_CONFIG = {
   //   Formatos soportados: MP3 stream, AAC, HLS (.m3u8)
   STREAM_URL: "https://radio-sisid-ecuador.000webhostapp.com/stream",
 
+  // ── Opciones de API pública de radio ────────────────────────
+  // activar para intentar resolver stream a través de Radio Browser API
+  USE_PUBLIC_RADIO_API: true,
+  RADIO_API_BASE_URL: "https://de1.api.radio-browser.info/json",
+  RADIO_API_COUNTRY_CODE: "EC",
+  RADIO_API_PREFERRED_STATIONS: [] as const,
+  // Solo tomará emisoras que coincidan con al menos 1 palabra clave.
+  RADIO_API_GENRE_KEYWORDS: [
+    "chicha",
+    "kanari",
+    "canari",
+    "cañari",
+    "cumbia",
+    "reggaeton",
+    "regueton",
+    "reggaetón",
+  ] as const,
+  // Opcional: palabras a excluir (ejemplo: "rock", "cumbia").
+  RADIO_API_EXCLUDED_KEYWORDS: [] as const,
+
+  // ── Enlaces externos (estilo Ecualatina: TuneIn, Android, iPhone) ─
+  // Dejar vacío "" para ocultar el botón correspondiente.
+  TUNEIN_URL: "", // ej: "https://tunein.com/radio/.../
+  ANDROID_APP_URL: "https://play.google.com/store/apps/details?id=com.radiosisidecuador.host",
+  IPHONE_APP_URL: "", // ej: "https://apps.apple.com/.../id..."
+
   // ── SEO / Meta ───────────────────────────────────────────────
   META_DESCRIPTION: "Radio Sisid Ecuador — La voz del pueblo cañari. Desde Minneapolis, Minnesota hacia el mundo.",
   META_KEYWORDS: "radio, ecuador, cañari, en vivo, streaming, minneapolis, minnesota, radio online",
   OG_IMAGE_URL: "/img/seo-banner.png",
+
+  // ── Video embed (YouTube, Twitch, etc.) ──────────────────────
+  // URL que se incrustará en el panel de video. Dejar vacío para ocultar.
+  VIDEO_EMBED_URL: "https://www.youtube.com/embed/63jsVp1NKxE",
+
+  // ── opciones de radio API se incluyen como valores por defecto arriba
 } as const;
 
 export type AppConfig = typeof APP_CONFIG;
