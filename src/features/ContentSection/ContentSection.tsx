@@ -1,5 +1,5 @@
 import { PlayIcon, PauseIcon, SpeakerLoudIcon, SpeakerOffIcon, ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { APP_CONFIG } from "@/config";
 import { useAudio } from "@/context";
 import image3Src from "@/assets/img/radio-sisid.png";
@@ -22,6 +22,23 @@ export default function ContentSection() {
   const { playerState, controls } = useAudio();
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [videoIndex, setVideoIndex] = useState(0);
+  const [videoActive, setVideoActive] = useState(false);
+
+  // Auto-advance videos every 12s, pauses when user is watching
+  useEffect(() => {
+    if (videoActive) return;
+    const t = window.setInterval(() => {
+      setVideoLoaded(false);
+      setVideoIndex((i) => (i + 1) % VIDEOS.length);
+    }, 5000);
+    return () => window.clearInterval(t);
+  }, [videoActive, videoIndex]);
+
+  const changeVideo = (i: number) => {
+    setVideoActive(false);
+    setVideoLoaded(false);
+    setVideoIndex(i);
+  };
   const bars = [4, 8, 6, 12, 7, 14, 9, 16, 5, 11, 8, 13, 6, 15, 10, 12, 7, 14, 9, 11, 6, 13, 8, 10];
 
   return (
@@ -152,6 +169,14 @@ export default function ContentSection() {
               onLoad={() => { window.setTimeout(() => setVideoLoaded(true), 800); }}
               loading="lazy"
             />
+            {/* Click-capture overlay: hides when user interacts with video */}
+            {!videoActive && (
+              <div
+                className="absolute inset-0 z-20 cursor-pointer"
+                onClick={() => setVideoActive(true)}
+                aria-hidden="true"
+              />
+            )}
             <div
               aria-hidden="true"
               className={`pointer-events-none absolute inset-0 bg-black transition-opacity duration-500 ${
@@ -162,14 +187,14 @@ export default function ContentSection() {
             {VIDEOS.length > 1 && (
               <>
                 <button
-                  onClick={() => { setVideoLoaded(false); setVideoIndex((videoIndex - 1 + VIDEOS.length) % VIDEOS.length); }}
+                  onClick={() => { changeVideo((videoIndex - 1 + VIDEOS.length) % VIDEOS.length); }}
                   className="absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/60 p-1.5 text-white hover:bg-black/80"
                   aria-label="Video anterior"
                 >
                   <ChevronLeftIcon className="h-4 w-4" />
                 </button>
                 <button
-                  onClick={() => { setVideoLoaded(false); setVideoIndex((videoIndex + 1) % VIDEOS.length); }}
+                  onClick={() => { changeVideo((videoIndex + 1) % VIDEOS.length); }}
                   className="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/60 p-1.5 text-white hover:bg-black/80"
                   aria-label="Video siguiente"
                 >
@@ -179,7 +204,7 @@ export default function ContentSection() {
                   {VIDEOS.map((_, i) => (
                     <button
                       key={i}
-                      onClick={() => { setVideoLoaded(false); setVideoIndex(i); }}
+                      onClick={() => { changeVideo(i); }}
                       aria-label={`Video ${i + 1}`}
                       className={`h-1.5 rounded-full transition-all duration-300 ${
                         i === videoIndex ? "w-4 bg-[#ffcc00]" : "w-1.5 bg-white/40 hover:bg-white/70"

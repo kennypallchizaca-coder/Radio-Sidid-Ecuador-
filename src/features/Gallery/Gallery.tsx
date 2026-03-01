@@ -50,20 +50,6 @@ export default function Gallery() {
                   loading="lazy"
                 />
               ))}
-              <button
-                onClick={() => setFirstIndex((firstIndex - 1 + FIRST_CARD_IMAGES.length) % FIRST_CARD_IMAGES.length)}
-                className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"
-                aria-label="Anterior"
-              >
-                &#8249;
-              </button>
-              <button
-                onClick={() => setFirstIndex((firstIndex + 1) % FIRST_CARD_IMAGES.length)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"
-                aria-label="Siguiente"
-              >
-                &#8250;
-              </button>
             </div>
           </article>
 
