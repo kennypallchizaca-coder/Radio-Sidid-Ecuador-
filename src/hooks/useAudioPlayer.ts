@@ -25,11 +25,20 @@ export interface AudioPlayerControls {
   toggleMute: () => void;
 }
 
+/** Detecta iOS Safari (necesita play() sin load()) */
+const isIOS = () =>
+  /iP(hone|ad|od)/i.test(navigator.userAgent) ||
+  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+/** Detecta Android (necesita load() antes de play()) */
+const isAndroid = () => /Android/i.test(navigator.userAgent);
+
 export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
   const audio = useMemo(() => {
     const a = new Audio();
-    a.preload = "metadata";
+    a.preload = "none"; // Android: evitar carga automática antes de tocar play
     a.setAttribute("playsinline", "true");
+    a.setAttribute("webkit-playsinline", "true"); // Samsung Internet legacy
     return a;
   }, []);
 
@@ -85,15 +94,41 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
     return pending;
   }, []);
 
-  const safePlay = useCallback((a: HTMLAudioElement) => {
-    a.play().catch((err: DOMException) => {
-      if (err.name === "AbortError") return;
-      if (err.name === "NotAllowedError") {
-        setStatus("idle");
-        return;
+  const safePlay = useCallback((a: HTMLAudioElement, withLoad = false) => {
+    const doPlay = () => {
+      a.play().catch((err: DOMException) => {
+        if (err.name === "AbortError") {
+          // Android: load() interrumpió una llamada play() anterior — reintentar
+          setTimeout(() => safePlay(a), 300);
+          return;
+        }
+        if (err.name === "NotAllowedError") {
+          setStatus("idle");
+          return;
+        }
+        if (err.name === "NotSupportedError") {
+          setStatus("error");
+          return;
+        }
+        setStatus("error");
+      });
+    };
+
+    if (withLoad || isAndroid()) {
+      // Android/Samsung: load() es obligatorio para iniciar un stream nuevo
+      a.load();
+      a.addEventListener("canplay", doPlay, { once: true });
+    } else if (isIOS()) {
+      // iOS Safari: NO llamar load() — provoca AbortError
+      if (a.readyState >= 2) {
+        doPlay();
+      } else {
+        a.addEventListener("canplay", doPlay, { once: true });
       }
-      setStatus("error");
-    });
+    } else {
+      // Desktop / otros navegadores
+      doPlay();
+    }
   }, []);
 
   useEffect(() => {
@@ -105,10 +140,23 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
 
     const onWaiting = () => setStatus("loading");
     const onPlaying = () => setStatus("playing");
-    const onPause = () => setStatus("paused");
+    const onPause = () => {
+      // En iOS el sistema puede pausar el audio (llamada, bloqueo de pantalla)
+      // Solo marcar como paused si no estamos en proceso de carga
+      if (statusRef.current !== "loading") setStatus("paused");
+    };
+
+    let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
     const onError = () => {
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
       setStatus("error");
-      a.src = "";
+      // Reintentar automáticamente después de 4s (conexión móvil inestable)
+      reconnectTimeout = setTimeout(() => {
+        if (statusRef.current === "error") {
+          a.src = streamUrlRef.current || APP_CONFIG.STREAM_URL;
+          safePlay(a);
+        }
+      }, 4000);
     };
 
     const onProgress = () => {
@@ -121,14 +169,29 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
 
     let stallTimeout: ReturnType<typeof setTimeout> | null = null;
     const onStalled = () => {
-      if (statusRef.current === "playing") {
+      if (statusRef.current === "playing" || statusRef.current === "loading") {
         stallTimeout = setTimeout(() => {
-          if (!a.paused) {
+          if (statusRef.current !== "paused") {
             a.src = streamUrlRef.current || APP_CONFIG.STREAM_URL;
-            a.load();
             safePlay(a);
           }
-        }, 2500);
+        }, 3500);
+      }
+    };
+
+    // Android/Samsung: el stream nunca debería terminar, pero si ocurre — reconectar
+    const onEnded = () => {
+      if (streamUrlRef.current) {
+        a.src = streamUrlRef.current;
+        safePlay(a);
+      }
+    };
+
+    // Android: pantalla bloqueada puede pausar el audio sin disparar evento pause
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible" &&
+          statusRef.current === "playing" && a.paused) {
+        safePlay(a);
       }
     };
 
@@ -138,15 +201,20 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
     a.addEventListener("error", onError);
     a.addEventListener("progress", onProgress);
     a.addEventListener("stalled", onStalled);
+    a.addEventListener("ended", onEnded);
+    document.addEventListener("visibilitychange", onVisibilityChange);
 
     return () => {
       if (stallTimeout) clearTimeout(stallTimeout);
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
       a.removeEventListener("waiting", onWaiting);
       a.removeEventListener("playing", onPlaying);
       a.removeEventListener("pause", onPause);
       a.removeEventListener("error", onError);
       a.removeEventListener("progress", onProgress);
       a.removeEventListener("stalled", onStalled);
+      a.removeEventListener("ended", onEnded);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, [safePlay]);
 
@@ -169,7 +237,6 @@ export function useAudioPlayer(): [AudioPlayerState, AudioPlayerControls] {
 
       const currentAudio = audioRef.current;
       currentAudio.src = streamUrl;
-      currentAudio.load();
       safePlay(currentAudio);
     })();
   }, [status, safePlay, resolveStreamUrl]);
