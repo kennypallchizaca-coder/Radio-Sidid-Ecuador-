@@ -149,7 +149,7 @@ export default function ContentSection() {
               <img src={image3Src} alt="Promocion de radio" className="w-full object-contain sm:h-full sm:object-cover" loading="lazy" />
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-3 py-3">
                 <p className="text-sm font-bold uppercase tracking-widest text-[#ffcc00] drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
-                  📻 Radio Sisid Ecuador
+                  Radio Sisid Ecuador
                 </p>
                 <p className="text-[11px] font-medium text-white/70">La voz del pueblo cañari · En vivo 24h</p>
               </div>
