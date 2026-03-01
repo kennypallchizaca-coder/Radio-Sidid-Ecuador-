@@ -1,8 +1,14 @@
-import { PlayIcon, PauseIcon, SpeakerLoudIcon, SpeakerOffIcon } from "@radix-ui/react-icons";
+import { PlayIcon, PauseIcon, SpeakerLoudIcon, SpeakerOffIcon, ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import { useState, type ReactNode } from "react";
 import { APP_CONFIG } from "@/config";
 import { useAudio } from "@/context";
-import image3Src from "@/assets/img/image3.png";
+import image3Src from "@/assets/img/radio-sisid.png";
+
+const VIDEOS = [
+  ...(APP_CONFIG.VIDEO_EMBED_URL ? [APP_CONFIG.VIDEO_EMBED_URL] : []),
+  "https://www.youtube.com/embed/j1qcCyCgZV4",
+  "https://www.youtube.com/embed/dbVhHpgx4ZE",
+];
 
 function Panel({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
@@ -15,6 +21,7 @@ function Panel({ children, className = "" }: { children: ReactNode; className?: 
 export default function ContentSection() {
   const { playerState, controls } = useAudio();
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [videoIndex, setVideoIndex] = useState(0);
   const bars = [4, 8, 6, 12, 7, 14, 9, 16, 5, 11, 8, 13, 6, 15, 10, 12, 7, 14, 9, 11, 6, 13, 8, 10];
 
   return (
@@ -123,47 +130,66 @@ export default function ContentSection() {
           <Panel>
             <div className="relative overflow-hidden rounded-lg border border-white/10 sm:h-full">
               <img src={image3Src} alt="Promocion de radio" className="w-full object-contain sm:h-full sm:object-cover" loading="lazy" />
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-3 py-3">
+                <p className="text-sm font-bold uppercase tracking-widest text-[#ffcc00] drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
+                   Radio Sisid Ecuador
+                </p>
+                <p className="text-[11px] font-medium text-white/70">La voz del pueblo cañari · En vivo 24h</p>
+              </div>
             </div>
           </Panel>
         </div>
 
         <Panel className="!p-1.5">
-          {APP_CONFIG.VIDEO_EMBED_URL ? (
-            <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-white/10 bg-black sm:aspect-auto sm:h-full">
-              <iframe
-                src={APP_CONFIG.VIDEO_EMBED_URL}
-                title="Video en vivo"
-                allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-                className="absolute inset-0 h-full w-full bg-black"
-                style={{
-                  backgroundColor: "#000",
-                  touchAction: "pan-y",
-                  overscrollBehavior: "contain",
-                }}
-                onLoad={() => {
-                  window.setTimeout(() => setVideoLoaded(true), 800);
-                }}
-                loading="lazy"
-              />
-              <div
-                aria-hidden="true"
-                className={`pointer-events-none absolute inset-0 bg-black transition-opacity duration-500 ${
-                  videoLoaded ? "opacity-20" : "opacity-100"
-                }`}
-              />
-            </div>
-          ) : (
-            <div className="flex h-full items-center justify-center rounded-lg border border-white/10 bg-black">
-              <button
-                type="button"
-                onClick={controls.toggle}
-                aria-label="Reproducir"
-                className="flex h-11 w-16 items-center justify-center rounded-md border border-white/25 bg-white/10 text-white"
-              >
-                <PlayIcon className="h-5 w-5" />
-              </button>
-            </div>
-          )}
+          <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-white/10 bg-black sm:aspect-auto sm:h-full">
+            <iframe
+              key={VIDEOS[videoIndex]}
+              src={VIDEOS[videoIndex]}
+              title={`Video ${videoIndex + 1}`}
+              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+              className="absolute inset-0 h-full w-full bg-black"
+              style={{ backgroundColor: "#000", touchAction: "pan-y", overscrollBehavior: "contain" }}
+              onLoad={() => { window.setTimeout(() => setVideoLoaded(true), 800); }}
+              loading="lazy"
+            />
+            <div
+              aria-hidden="true"
+              className={`pointer-events-none absolute inset-0 bg-black transition-opacity duration-500 ${
+                videoLoaded ? "opacity-0" : "opacity-100"
+              }`}
+            />
+            {/* Arrows */}
+            {VIDEOS.length > 1 && (
+              <>
+                <button
+                  onClick={() => { setVideoLoaded(false); setVideoIndex((videoIndex - 1 + VIDEOS.length) % VIDEOS.length); }}
+                  className="absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/60 p-1.5 text-white hover:bg-black/80"
+                  aria-label="Video anterior"
+                >
+                  <ChevronLeftIcon className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => { setVideoLoaded(false); setVideoIndex((videoIndex + 1) % VIDEOS.length); }}
+                  className="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/60 p-1.5 text-white hover:bg-black/80"
+                  aria-label="Video siguiente"
+                >
+                  <ChevronRightIcon className="h-4 w-4" />
+                </button>
+                <div className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
+                  {VIDEOS.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => { setVideoLoaded(false); setVideoIndex(i); }}
+                      aria-label={`Video ${i + 1}`}
+                      className={`h-1.5 rounded-full transition-all duration-300 ${
+                        i === videoIndex ? "w-4 bg-[#ffcc00]" : "w-1.5 bg-white/40 hover:bg-white/70"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
         </Panel>
 
       </div>
