@@ -11,15 +11,6 @@ export default function Hero() {
   const [index, setIndex] = useState(0);
   const [visible, setVisible] = useState(true);
 
-  const goTo = (i: number) => {
-    if (i === index) return;
-    setVisible(false);
-    setTimeout(() => {
-      setIndex(i);
-      setVisible(true);
-    }, 350);
-  };
-
   useEffect(() => {
     const timer = setInterval(() => {
       setVisible(false);
