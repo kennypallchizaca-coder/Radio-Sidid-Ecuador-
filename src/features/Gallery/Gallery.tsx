@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { SECTION_IDS } from "@/constants/routes";
 
 const SECOND_CARD_IMAGES = [
-  { src: "public/img/bienvenidos.png", alt: "Imagen promocional 3" },
-  { src: "public/img/iglesia.jpg", alt: "Imagen promocional 4" },
-]
+  { src: "/img/bienvenidos.png", alt: "Imagen promocional 3" },
+  { src: "/img/iglesia.jpg", alt: "Imagen promocional 4" },
+];
 
 export default function Gallery() {
   const [secondIndex, setSecondIndex] = useState(0);
