@@ -3,6 +3,7 @@ interface RadioBrowserStation {
   url?: string;
   url_resolved?: string;
   codec?: string;
+  bitrate?: number;
   tags?: string;
   votes?: number;
 }
@@ -22,6 +23,23 @@ interface ResolvedRadioStream {
 }
 
 const PLAYABLE_CODECS = new Set(["mp3", "aac", "aac+", "ogg", "opus"]);
+// Codecs ordenados por calidad percibida (mayor índice = mejor)
+const CODEC_QUALITY: Record<string, number> = {
+  "opus": 5,
+  "aac+": 4,
+  "aac":  3,
+  "ogg":  2,
+  "mp3":  1,
+};
+
+/** Puntaje de calidad: combina bitrate + codec para elegir el mejor stream */
+function qualityScore(station: RadioBrowserStation): number {
+  const bitrate = station.bitrate ?? 0;
+  const codec = (station.codec ?? "").toLowerCase();
+  const codecScore = CODEC_QUALITY[codec] ?? 0;
+  // Bitrate tiene más peso; codec desempata
+  return bitrate * 10 + codecScore;
+}
 const URL_BLOCKLIST = [".m3u", ".m3u8", ".pls"];
 
 function normalizeName(value: string): string {
@@ -105,7 +123,7 @@ export async function resolveEcuadorRadioStream(
     hidebroken: "true",
     order: "votes",
     reverse: "true",
-    limit: String(options.limit ?? 50),
+    limit: String(options.limit ?? 80), // más candidatos para tener más opciones de calidad
   });
 
   const endpoint = `${base}/stations/bycountrycodeexact/${encodeURIComponent(countryCode)}?${params.toString()}`;
@@ -145,7 +163,20 @@ export async function resolveEcuadorRadioStream(
   const genrePool = byGenre;
 
   const preferred = selectPreferredStation(genrePool, options.preferredStations ?? []);
-  const picked = preferred ?? genrePool[0];
+
+  let picked: RadioBrowserStation;
+  if (preferred) {
+    picked = preferred;
+  } else {
+    // Priorizar por calidad: bitrate alto + codec AAC/Opus
+    // Mínimo aceptable: 96 kbps (por debajo la calidad es inaceptable en móvil)
+    const highQuality = genrePool
+      .filter((s) => (s.bitrate ?? 0) >= 96)
+      .sort((a, b) => qualityScore(b) - qualityScore(a));
+
+    picked = highQuality.length > 0 ? highQuality[0] : genrePool[0];
+  }
+
   const streamUrl = pickStreamUrl(picked);
   if (!streamUrl) return null;
 
