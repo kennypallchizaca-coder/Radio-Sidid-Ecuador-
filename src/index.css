@@ -160,16 +160,7 @@
 }
 
 .player-bar-active {
-  background: linear-gradient(
-    to top,
-    #d50000 0%,
-    #ff1744 25%,
-    #1231a0 40%,
-    #2962ff 55%,
-    #ffd600 75%,
-    #ffea00 100%
-  );
-  box-shadow: 0 0 6px rgba(213, 0, 0, 0.35);
+  border-radius: 2px 2px 0 0;
 }
 
 ::-webkit-scrollbar {

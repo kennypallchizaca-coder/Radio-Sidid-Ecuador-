@@ -39,7 +39,7 @@ export default function ContentSection() {
     setVideoLoaded(false);
     setVideoIndex(i);
   };
-  const bars = [4, 8, 6, 12, 7, 14, 9, 16, 5, 11, 8, 13, 6, 15, 10, 12, 7, 14, 9, 11, 6, 13, 8, 10];
+  const bars = [4, 8, 6, 12, 7, 14, 9, 16, 5, 11, 8, 13, 6, 15, 10, 12, 7, 14, 9, 11, 6, 13, 8, 10, 5, 9, 7, 11, 6, 14, 8, 12];
 
   return (
     <section aria-label="Audio y video" className="px-3 py-4 sm:px-5 sm:py-5">
@@ -52,7 +52,7 @@ export default function ContentSection() {
 
             {/* ── Equalizer ── */}
             <div className="relative flex flex-1 items-end justify-center px-3 pb-1 pt-2 sm:px-4 lg:px-5">
-              <div className="grid h-full w-full grid-cols-[repeat(24,minmax(0,1fr))] items-end gap-[3px] sm:gap-1">
+              <div className="grid h-full w-full grid-cols-[repeat(32,minmax(0,1fr))] items-end gap-[4px] sm:gap-[6px]">
                 {bars.map((height, index) => (
                   <span
                     key={`bar-${index}`}
@@ -66,6 +66,10 @@ export default function ContentSection() {
                       animation: playerState.isPlaying
                         ? `equalizer ${0.8 + (index % 5) * 0.15}s cubic-bezier(.25,.1,.25,1) ${index * 0.04}s infinite`
                         : "none",
+                      ...(playerState.isPlaying && {
+                        background: `linear-gradient(to top, hsl(${Math.round((index / 32) * 360)}, 100%, 30%), hsl(${Math.round((index / 32) * 360)}, 100%, 65%))`,
+                        boxShadow: `0 0 6px hsl(${Math.round((index / 32) * 360)}, 100%, 55%)`,
+                      }),
                     }}
                   />
                 ))}
